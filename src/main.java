@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import attributes.*;
 
 public class main {
+    //test (bitte löschen)
     public static void main(String argv[]) throws ParseException {
         XMLReader xmlReader = new XMLReader();
         SchedulingPeriod schedulingPeriod = xmlReader.parseXML("long01");
