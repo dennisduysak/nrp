@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import attributes.*;
-
+// hallo
 public class main {
     public static void main(String argv[]) throws ParseException {
         XMLReader xmlReader = new XMLReader();
