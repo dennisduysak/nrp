@@ -15,5 +15,7 @@ public class main {
         //Initiallösung auf Restriktionen prüfen und bewerten
         Constraint constraint = new Constraint(schedulingPeriod, initial);
         int initialScore = constraint.checkConstraints();
+
+        System.out.println("Strafpunkte der Initiallösung: " + initialScore);
     }
 }

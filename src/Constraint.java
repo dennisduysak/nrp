@@ -9,7 +9,7 @@ import java.util.List;
 public class Constraint {
     private SchedulingPeriod schedulingPeriod;
     private Helper helper;
-    List<int[][]> solution;
+    private List<int[][]> solution;
 
     public Constraint(SchedulingPeriod schedulingPeriod, List<int[][]> solution) {
         this.schedulingPeriod = schedulingPeriod;
@@ -55,7 +55,7 @@ public class Constraint {
      * Prüft die weichen Restriktionen
      *
      * @return Strafpunkte
-     * @throws Exception
+     * @throws Exception    wenn harte Restriktionen nicht erfüllt wurden
      */
     public int checkConstraints() throws Exception {
         int strafpunkte = 0;
@@ -81,16 +81,16 @@ public class Constraint {
         int employeeSize = helper.getEmployeeList().size();
         int shiftSize = helper.getShiftList().size();
         List<Integer> numbOfShiftInPeriod = new ArrayList<>(Collections.nCopies(employeeSize, 0));
-        for (int i = 0; i < solution.size(); i++) {
+        for (int[][] aSolution : solution) {
             for (int k = 0; k < shiftSize; k++) {
                 for (int l = 0; l < employeeSize; l++) {
-                    int[][] employeeWorkDay = solution.get(i);
-                    int temp = numbOfShiftInPeriod.get(l) + employeeWorkDay[k][l];
+                    int temp = numbOfShiftInPeriod.get(l) + aSolution[k][l];
                     numbOfShiftInPeriod.set(l, temp);
                 }
             }
         }
-
+        //Liste der Mitarbeiter mit der Differenz (Restriktionsverstoß) TODO: evtl. umbenennen
+        List<Integer> numbOfDiffDays = new ArrayList<>();
         for (int i = 0; i < numbOfShiftInPeriod.size(); i++) {
             Employee e = (Employee) schedulingPeriod.getEmployees().get(i);
             Contract c = (Contract) schedulingPeriod.getContracts().get(e.getContractId());
@@ -109,8 +109,9 @@ public class Constraint {
                     diffDays += minDaysOfWork - daysOfWork;
                 }
             }
-            return diffDays;
+            numbOfDiffDays.add(diffDays);
         }
-        return 0;
+        //summierte Liste
+        return numbOfDiffDays.stream().mapToInt(Integer::intValue).sum();
     }
 }
