@@ -1,15 +1,11 @@
 import attributes.*;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class InitialSolution {
     private static SchedulingPeriod schedulingPeriod;
     private Helper helper;
-    private List<int[][]> solutionMatrix = new ArrayList<>();
 
     InitialSolution(SchedulingPeriod schedulingPeriod) {
         this.schedulingPeriod = schedulingPeriod;
@@ -17,9 +13,9 @@ public class InitialSolution {
     }
 
     public List<int[][]> createSolution() {
-        List<DayOffWeekCover> requirementList = helper.getRequirement();
-        List<Employee> employeeList = helper.getEmployee();
-        List<Shift> shiftList = helper.getShift();
+        List<int[][]> solutionMatrix = new ArrayList<>();
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Shift> shiftList = helper.getShiftList();
 
         int employeeSize = employeeList.size();
         int shiftTypeSize = shiftList.size();
@@ -34,18 +30,18 @@ public class InitialSolution {
                 if (nurseCounter > employeeSize - 1) {
                     nurseCounter = 0;
                 }
-                    Employee employee = employeeList.get(nurseCounter); //ich weiß nicht, ob "List" hier richtig ist
-                    //nurseCounter soll sagen, an welcher Stelle in der employeeList die nurse rausgesucht werden soll
+                    Employee employee = employeeList.get(nurseCounter);
                     int dhReq = req.get(0);
                 if (size == 0 && dhReq == 0) {
                     break;
                 }
+                    //Wenn Oberschwester und der Bedarf an Oberschwestern an Tag x nicht gedeckt ist => Zuteilung
                     if ((employee.getSkills().contains(Skill.HEAD_NURSE) && dhReq > 0) && (day[0][employee.getId()] != 1)) {
-                        // ^ das soll gucken, ob die Nurse den Skill hat und an diesem Tag noch nicht arbeitet!
                         day[0][employee.getId()] = 1;
                         dhReq--;
                         req.set(0, dhReq);
-                    } else if (day[size][employee.getId()] != 1) { //überprüfen, dass die Nurse an diesem Tag noch nicht arbeitet
+                     //Wenn keine Oberschwester => Zuteilung um den Bedarf zu decken
+                    } else if (day[size][employee.getId()] != 1) {
                         int reqShift = req.get(size);
                         if (reqShift > 0) {
                             day[size][employee.getId()] = 1;

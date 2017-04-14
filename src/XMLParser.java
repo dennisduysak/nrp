@@ -26,32 +26,37 @@ import attributes.Shift;
 import attributes.ShiftOff;
 import attributes.Skill;
 
-public class XMLReader {
-    Document xmlDoc;
-    Element rootElement;
+public class XMLParser {
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-    SchedulingPeriod schedulingPeriod = new SchedulingPeriod();
+    String filePath;
 
-    public SchedulingPeriod parseXML(String file) throws ParseException {
+    public XMLParser(String fileName) {
+        filePath = "files/" + fileName + ".xml";
+    }
 
-        rootElement = parseXMLDoc(file);
+    public SchedulingPeriod parseXML() throws ParseException {
+        Element rootElement = getElementFromXML();
+        SchedulingPeriod schedulingPeriod = new SchedulingPeriod();
+
+        //Set Header
         schedulingPeriod.setId(rootElement.getAttribute("ID"));
         Date startDate = dateFormat.parse(rootElement.getElementsByTagName("StartDate").item(0).getTextContent());
         Date endDate = dateFormat.parse(rootElement.getElementsByTagName("EndDate").item(0).getTextContent());
         schedulingPeriod.setStartDate(startDate);
         schedulingPeriod.setEndDate(endDate);
 
-        parseSkills();
+        //Set Nodes
+        parseSkills(rootElement, schedulingPeriod);
         String[] rootObjects = {"ShiftTypes", "Patterns", "Contracts", "Employees", "CoverRequirements", "DayOffRequests", "ShiftOffRequests"};
         String[] childObjects = {"Shift", "Pattern", "Contract", "Employee", "DayOfWeekCover", "DayOff", "ShiftOff"};
         for (int i = 0; i < rootObjects.length; i++) {
-            parseObjects(rootObjects[i], childObjects[i]);
+            parseObjects(rootElement, rootObjects[i], childObjects[i], schedulingPeriod);
         }
         return schedulingPeriod;
     }
 
-    private void parseObjects(String root, String child) throws ParseException {
+    private void parseObjects(Element rootElement, String root, String child, SchedulingPeriod schedulingPeriod) throws ParseException {
         List<Object> objectList = new ArrayList<>();
         Node node = rootElement.getElementsByTagName(root).item(0);
         Element element = (Element) node;
@@ -297,7 +302,7 @@ public class XMLReader {
         return pattern;
     }
 
-    private void parseSkills() {
+    private void parseSkills(Element rootElement, SchedulingPeriod schedulingPeriod) {
         Node node = rootElement.getElementsByTagName("Skills").item(0);
         Element element = (Element) node;
         NodeList nodeList = element.getElementsByTagName("Skill");
@@ -332,11 +337,11 @@ public class XMLReader {
         return skillList;
     }
 
-    private Element parseXMLDoc(String file) {
+    private Element getElementFromXML() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            xmlDoc = builder.parse(new File("files/" + file + ".xml"));
+            Document xmlDoc = builder.parse(new File(filePath));
             return xmlDoc.getDocumentElement();
         } catch (Exception e) {
             e.printStackTrace();
