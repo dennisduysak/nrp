@@ -1,23 +1,19 @@
-import java.text.ParseException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import attributes.*;
 
 public class main {
-    public static void main(String argv[]) throws ParseException {
-        XMLReader xmlReader = new XMLReader();
+    public static void main(String argv[]) throws Exception {
         //Problem
-        SchedulingPeriod schedulingPeriod = xmlReader.parseXML("long01");
+        XMLParser xmlParser = new XMLParser("long01");
+        SchedulingPeriod schedulingPeriod = xmlParser.parseXML();
+
+        //Initiallösung
         InitialSolution initialSolution = new InitialSolution(schedulingPeriod);
-        //Initiallösung:
         List<int[][]> initial = initialSolution.createSolution();
 
-        HardRest hardRest = new HardRest(schedulingPeriod);
-        boolean  b = hardRest.checkHardRest(initial);
-
-
-
-
+        //Initiallösung auf Restriktionen prüfen und bewerten
+        Constraint constraint = new Constraint(schedulingPeriod, initial);
+        int initialScore = constraint.checkConstraints();
     }
 }

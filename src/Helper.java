@@ -13,33 +13,33 @@ public class Helper {
         this.schedulingPeriod = schedulingPeriod;
     }
 
-    public List<DayOffWeekCover> getRequirement() {
+    public List<DayOffWeekCover> getRequirementList() {
         return schedulingPeriod.getCoverRequirements().stream()
                 .map(object -> (DayOffWeekCover) object)
                 .collect(Collectors.toList());
     }
 
-    public List<Employee> getEmployee() {
+    public List<Employee> getEmployeeList() {
         return schedulingPeriod.getEmployees().stream()
                 .map(object -> (Employee) object)
                 .collect(Collectors.toList());
     }
 
-    public List<Shift> getShift() {
+    public List<Shift> getShiftList() {
         return schedulingPeriod.getShiftTypes().stream()
                 .map(object -> (Shift) object)
                 .collect(Collectors.toList());
     }
 
-    public int getRequirement(List<DayOffWeekCover> requirementList, String shifType, int i) {
+    public int getRequirement(List<DayOffWeekCover> requirementList, String shiftId, int daysAfterStart) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(schedulingPeriod.getStartDate());
-        cal.add(Calendar.DATE, i);
+        cal.add(Calendar.DATE, daysAfterStart);
         Day weekday = getWeekDay(cal.get(Calendar.DAY_OF_WEEK));
         for (DayOffWeekCover d : requirementList) {
             if (d.getDay().equals(weekday)) {
                 for (Cover c : d.getCovers()) {
-                    if (c.getShift().equals(shifType)) {
+                    if (c.getShift().equals(shiftId)) {
                         return c.getPreferred();
                     }
                 }
@@ -48,21 +48,21 @@ public class Helper {
         return 0;
     }
 
-    public List<Integer> getReq(int index){
+    public List<Integer> getReq(int index) {
         List<Integer> req = new ArrayList<>();
-        List<DayOffWeekCover> requirementList = getRequirement();
-        List<Shift> shiftList = getShift();
+        List<DayOffWeekCover> requirementList = getRequirementList();
+        List<Shift> shiftList = getShiftList();
         int dhIndex = 99;
         for (int i = 0; i < shiftList.size(); i++) {
-            String id = shiftList.get(i).getId();
+            String shiftId = shiftList.get(i).getId();
 
-            if (id.equals("DH")) {
+            if (shiftId.equals("DH")) {
                 dhIndex = i;
             } else {
-                req.add(getRequirement(getRequirement(), id, index));
+                req.add(getRequirement(requirementList, shiftId, index));
             }
         }
-        req.add(getRequirement(getRequirement(), shiftList.get(dhIndex).getId(), index));
+        req.add(getRequirement(requirementList, shiftList.get(dhIndex).getId(), index));
         return req;
     }
 
