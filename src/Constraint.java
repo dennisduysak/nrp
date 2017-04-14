@@ -1,7 +1,6 @@
 import attributes.Contract;
 import attributes.Employee;
 import attributes.SchedulingPeriod;
-import attributes.Shift;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,22 +17,26 @@ public class Constraint {
         this.solution = solution;
     }
 
+    /**
+     * Prüft die solution auf harte Restriktionen
+     *
+     * @return true, wenn die harten Restriktionen erfüllt wurden, false sonst
+     */
     private boolean checkHardConst() {
         int employeeWorkAtOneDay = 0;
-        List<Shift> shiftList = helper.getShiftList();
         for (int i = 0; i < solution.size(); i++) {
-            List<Integer> req = helper.getReq(i);
+            List<Integer> requirementsForDay = helper.getRequirementsForDay(i);
             int employeeSize = helper.getEmployeeList().size();
             for (int j = 0; j < employeeSize; j++) {
-                int[][] shiftList2 = solution.get(i);
-                for (int k = 0; k < shiftList.size(); k++) {
+                int[][] shiftList = solution.get(i);
+                for (int k = 0; k < helper.getShiftList().size(); k++) {
                     int demand = 0;
                     for (int l = 0; l < employeeSize; l++) {
-                        demand += shiftList2[k][l];
+                        demand += shiftList[k][l];
                     }
-                    if (demand > req.get(k)) {
+                    if (demand > requirementsForDay.get(k)) {
                         return false;
-                    } else if (demand < req.get(k)) {
+                    } else if (demand < requirementsForDay.get(k)) {
                         return false;
                     }
                     int[][] d = solution.get(i);
@@ -48,6 +51,12 @@ public class Constraint {
         return true;
     }
 
+    /**
+     * Prüft die weichen Restriktionen
+     *
+     * @return Strafpunkte
+     * @throws Exception
+     */
     public int checkConstraints() throws Exception {
         int strafpunkte = 0;
         if (!checkHardConst()) {
@@ -60,6 +69,12 @@ public class Constraint {
         return strafpunkte;
     }
 
+    /**
+     * Prüft, ob die minimale und maximale Anzahl an Diensten in einer Periode, festgelegt im Vertrag, über-
+     * bzw. unterschritten sind.
+     *
+     * @return Differenz in Tagen bei Über- und Unterschreitung (einen Tag zu vie/wenig => Strafpunkt)
+     */
     private int checkNumbAssigment() {
 
         //List: numbOfShiftInPeriod Number of Workingdays per Nurse per Period

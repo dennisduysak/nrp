@@ -35,6 +35,12 @@ public class XMLParser {
         filePath = "files/" + fileName + ".xml";
     }
 
+    /**
+     * Parst die XML-Datei und generiert die schedulingPeriod
+     *
+     * @return schedulingPeriod
+     * @throws ParseException
+     */
     public SchedulingPeriod parseXML() throws ParseException {
         Element rootElement = getElementFromXML();
         SchedulingPeriod schedulingPeriod = new SchedulingPeriod();
@@ -99,6 +105,12 @@ public class XMLParser {
         }
     }
 
+    /**
+     * Parset die Vertragsdaten
+     *
+     * @param e Contract-Element
+     * @return Contract
+     */
     private Contract parseContracts(Element e) {
         Contract contract = new Contract();
         String root;
@@ -193,6 +205,12 @@ public class XMLParser {
         return contract;
     }
 
+    /**
+     * Erstellt eine Liste von Days, die der String days enthält
+     *
+     * @param days Sting mit Wochentagen
+     * @return Liste der Wochentage
+     */
     private List<Day> checkWeekendDays(String days) {
         List<Day> dayList = new ArrayList<>();
         if (days.contains(Day.Friday.name())) {
@@ -324,6 +342,12 @@ public class XMLParser {
         return shift;
     }
 
+    /**
+     * Erstellt eine Liste der vorhandenen Skills
+     *
+     * @param skillNodeList Liste der Skills
+     * @return Liste der vorhandenen Skills
+     */
     private List<Skill> parseSkills(NodeList skillNodeList) {
         List<Skill> skillList = new ArrayList<>();
         for (int j = 0; j < skillNodeList.getLength(); j++) {
@@ -337,6 +361,11 @@ public class XMLParser {
         return skillList;
     }
 
+    /**
+     * Liest die XML Datei ein
+     *
+     * @return Gibt das Element der XML Datei wieder
+     */
     private Element getElementFromXML() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

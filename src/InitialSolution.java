@@ -12,6 +12,12 @@ public class InitialSolution {
         helper = new Helper(this.schedulingPeriod);
     }
 
+    /**
+     * Entwirft eine Initiallösung, bei dem nur harte Restriktionen berücksichtigt werden.
+     *
+     * @return solutionMatrix   Liste von zweidimensionalen int-Arrays (pro Tag einen Eintrag in der Liste)
+     *                          int-Array: Tabelle der Schichten pro Mitarbeiter (1, arbeitet in Schicht x, 0 nicht)
+     */
     public List<int[][]> createSolution() {
         List<int[][]> solutionMatrix = new ArrayList<>();
         List<Employee> employeeList = helper.getEmployeeList();
@@ -23,15 +29,15 @@ public class InitialSolution {
 
         for (int i = 0; i < helper.getDaysInPeriod(); i++) {
             int[][] day = new int[shiftTypeSize][employeeSize];
-            List<Integer> req = helper.getReq(i);
-            int size = req.size() - 1;
+            List<Integer> requirementsForDay = helper.getRequirementsForDay(i);
+            int size = requirementsForDay.size() - 1;
 
             for (int j = 0; j < 999; j++) {
                 if (nurseCounter > employeeSize - 1) {
                     nurseCounter = 0;
                 }
                     Employee employee = employeeList.get(nurseCounter);
-                    int dhReq = req.get(0);
+                    int dhReq = requirementsForDay.get(0);
                 if (size == 0 && dhReq == 0) {
                     break;
                 }
@@ -39,14 +45,14 @@ public class InitialSolution {
                     if ((employee.getSkills().contains(Skill.HEAD_NURSE) && dhReq > 0) && (day[0][employee.getId()] != 1)) {
                         day[0][employee.getId()] = 1;
                         dhReq--;
-                        req.set(0, dhReq);
+                        requirementsForDay.set(0, dhReq);
                      //Wenn keine Oberschwester => Zuteilung um den Bedarf zu decken
                     } else if (day[size][employee.getId()] != 1) {
-                        int reqShift = req.get(size);
+                        int reqShift = requirementsForDay.get(size);
                         if (reqShift > 0) {
                             day[size][employee.getId()] = 1;
                             reqShift--;
-                            req.set(size, reqShift);
+                            requirementsForDay.set(size, reqShift);
                         } else {
                             size--;
                             nurseCounter--;
