@@ -1,3 +1,11 @@
+import attributes.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -5,26 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import attributes.Contract;
-import attributes.Cover;
-import attributes.Day;
-import attributes.DayOff;
-import attributes.DayOffWeekCover;
-import attributes.Employee;
-import attributes.Pattern;
-import attributes.PatternEntry;
-import attributes.SchedulingPeriod;
-import attributes.Shift;
-import attributes.ShiftOff;
-import attributes.Skill;
 
 public class XMLParser {
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -49,8 +37,8 @@ public class XMLParser {
         if (rootElement != null) {
             schedulingPeriod.setId(rootElement.getAttribute("ID"));
         }
-        Date startDate = dateFormat.parse(getNodeName(rootElement,"StartDate"));
-        Date endDate = dateFormat.parse(getNodeName(rootElement,"EndDate"));
+        Date startDate = dateFormat.parse(getNodeName(rootElement, "StartDate"));
+        Date endDate = dateFormat.parse(getNodeName(rootElement, "EndDate"));
         schedulingPeriod.setStartDate(startDate);
         schedulingPeriod.setEndDate(endDate);
 
@@ -135,7 +123,7 @@ public class XMLParser {
         String attr_weight = "weight";
         String attr_on = "on";
         contract.setId(Integer.parseInt(e.getAttribute("ID")));
-        contract.setDescription(getNodeName(e,"Description"));
+        contract.setDescription(getNodeName(e, "Description"));
 
         root = "SingleAssignmentPerDay";
         contract.setSingleAssignmentPerDay(Boolean.parseBoolean(getNodeName(e, root)));
@@ -208,15 +196,15 @@ public class XMLParser {
 
         root = "UnwantedPatterns";
         List<Integer> unwantedPatterns = new ArrayList<>();
-        Node node = getNode(e,root);
+        Node node = getNode(e, root);
         Element element = (Element) node;
         NodeList nodeList = element.getElementsByTagName("Pattern");
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node currentNode = nodeList.item(i);
             Element ee = (Element) currentNode;
             unwantedPatterns.add(Integer.parseInt(ee.getTextContent()));
-          //  Pattern pattern = (Pattern) schedulingPeriod.getPatterns().get(0);
-          //  pattern.getId()
+            //  Pattern pattern = (Pattern) schedulingPeriod.getPatterns().get(0);
+            //  pattern.getId()
         }
         contract.setUnwantedPatterns(unwantedPatterns);
 
@@ -307,9 +295,9 @@ public class XMLParser {
     private ShiftOff parseShiftOffRequests(Element e) throws ParseException {
         ShiftOff shiftOff = new ShiftOff();
         shiftOff.setWeight(Integer.parseInt(e.getAttribute("weight")));
-        shiftOff.setShiftTypeId(getNodeName(e,"ShiftTypeID"));
-        shiftOff.setEmployeeId(Integer.parseInt(getNodeName(e,"EmployeeID")));
-        shiftOff.setDate(dateFormat.parse(getNodeName(e,"Date")));
+        shiftOff.setShiftTypeId(getNodeName(e, "ShiftTypeID"));
+        shiftOff.setEmployeeId(Integer.parseInt(getNodeName(e, "EmployeeID")));
+        shiftOff.setDate(dateFormat.parse(getNodeName(e, "Date")));
         return shiftOff;
     }
 
@@ -318,7 +306,7 @@ public class XMLParser {
         pattern.setId(Integer.parseInt(e.getAttribute("ID")));
         pattern.setWeight(Integer.parseInt(e.getAttribute("weight")));
         List<PatternEntry> patternEntryList = new ArrayList<>();
-        Node patternNode = getNode(e,"PatternEntries");
+        Node patternNode = getNode(e, "PatternEntries");
         Element patternElement = (Element) patternNode;
         NodeList patternNodeList = patternElement.getElementsByTagName("PatternEntry");
         for (int j = 0; j < patternNodeList.getLength(); j++) {
@@ -342,7 +330,7 @@ public class XMLParser {
     }
 
     private void parseSkills(Element rootElement, SchedulingPeriod schedulingPeriod) {
-        Node node = getNode(rootElement,"Skills");
+        Node node = getNode(rootElement, "Skills");
         Element element = (Element) node;
         NodeList nodeList = element.getElementsByTagName("Skill");
         List<Skill> skillList = parseSkills(nodeList);
@@ -352,9 +340,9 @@ public class XMLParser {
     private Shift parseShiftTypes(Element e) throws ParseException {
         Shift shift = new Shift();
         shift.setId(e.getAttribute("ID"));
-        shift.setStartTime(timeFormat.parse(getNodeName(e,"StartTime")));
-        shift.setEndTime(timeFormat.parse(getNodeName(e,"EndTime")));
-        shift.setDesciption(getNodeName(e,"Description"));
+        shift.setStartTime(timeFormat.parse(getNodeName(e, "StartTime")));
+        shift.setEndTime(timeFormat.parse(getNodeName(e, "EndTime")));
+        shift.setDesciption(getNodeName(e, "Description"));
         Node skillNode = getNode(e, "Skills");
         Element skillElement = (Element) skillNode;
         NodeList skillNodeList = skillElement.getElementsByTagName("Skill");

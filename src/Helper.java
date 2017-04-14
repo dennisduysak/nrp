@@ -49,7 +49,7 @@ public class Helper {
     /**
      * Gibt den Bedarf der Schicht an dem bestimmten Wochentag wieder.
      *
-     * @param shiftId SchiftID
+     * @param shiftId        SchiftID
      * @param daysAfterStart Anzahl der Tage nach beginn der Periode
      * @return Bedarf
      */
@@ -72,11 +72,11 @@ public class Helper {
     }
 
     /**
-     *  Gibt eine Liste von Integern wieder die den Bedarf der Schichten abhängig vom Wochentag beiinhaltet
-     *  Der Bedarf der Oberschwestern befindet sich im Listenanfang
+     * Gibt eine Liste von Integern wieder die den Bedarf der Schichten abhängig vom Wochentag beiinhaltet
+     * Der Bedarf der Oberschwestern befindet sich im Listenanfang
      *
      * @param daysAfterStart Anzahl der Tage nach beginn der Periode
-     * @return               Liste von Integern mit Bedarf
+     * @return Liste von Integern mit Bedarf
      */
     public List<Integer> getRequirementsForDay(int daysAfterStart) {
         List<Integer> requirements = new ArrayList<>();
@@ -93,14 +93,16 @@ public class Helper {
             }
         }
         //füge den Bedarf der Oberschwester an den Listenanfang
-        requirements.add(0, getRequirement(shiftList.get(dhIndex).getId(), daysAfterStart));
+        if (dhIndex != 99) {
+            requirements.add(0, getRequirement(shiftList.get(dhIndex).getId(), daysAfterStart));
+        }
         return requirements;
     }
 
     /**
      * Zählt die Tage zwischen Anfang und Ende der Periode
      *
-     * @return  Anzahl an Tagen
+     * @return Anzahl an Tagen
      */
     public int getDaysInPeriod() {
         long diff = schedulingPeriod.getEndDate().getTime() - schedulingPeriod.getStartDate().getTime();
@@ -111,7 +113,7 @@ public class Helper {
      * Gibt zum passender Indexnummer den korrekten Wochentag aus.
      *
      * @param weekDay indexnummer des Wochentags
-     * @return  Wochentag der Klasse Day
+     * @return Wochentag der Klasse Day
      */
     private Day getWeekDay(int weekDay) {
         switch (weekDay) {

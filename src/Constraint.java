@@ -55,7 +55,7 @@ public class Constraint {
      * Prüft die weichen Restriktionen
      *
      * @return Strafpunkte
-     * @throws Exception    wenn harte Restriktionen nicht erfüllt wurden
+     * @throws Exception wenn harte Restriktionen nicht erfüllt wurden
      */
     public int checkConstraints() throws Exception {
         int strafpunkte = 0;
@@ -99,13 +99,13 @@ public class Constraint {
             int daysOfWork = numbOfShiftInPeriod.get(i);
             int maxDaysOfWork = c.getMaxNumAssignments();
             int minDaysOfWork = c.getMinNumAssignments();
-            if(c.getMaxNumAssignments_on() == 1) {
-                if(maxDaysOfWork < daysOfWork) {
+            if (c.getMaxNumAssignments_on() == 1) {
+                if (maxDaysOfWork < daysOfWork) {
                     diffDays += daysOfWork - maxDaysOfWork;
                 }
             }
-            if(c.getMinNumAssignments_on() == 1) {
-                if(minDaysOfWork > daysOfWork) {
+            if (c.getMinNumAssignments_on() == 1) {
+                if (minDaysOfWork > daysOfWork) {
                     diffDays += minDaysOfWork - daysOfWork;
                 }
             }
