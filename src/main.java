@@ -5,7 +5,7 @@ import java.util.List;
 public class main {
     public static void main(String argv[]) throws Exception {
         //Problem
-        XMLParser xmlParser = new XMLParser("medium_hint02");
+        XMLParser xmlParser = new XMLParser("long01");
         SchedulingPeriod schedulingPeriod = xmlParser.parseXML();
 
         //Initiallösung

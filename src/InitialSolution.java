@@ -50,7 +50,7 @@ public class InitialSolution {
                     dhReq--;
                     requirementsForDay.set(0, dhReq);
                     //Wenn keine Oberschwester => Zuteilung um den Bedarf zu decken
-                } else if (day[size][employee.getId()] != 1) {
+                } else if (day[size][employee.getId()] != 1 && size != 0) {
                     int reqShift = requirementsForDay.get(size);
                     if (reqShift > 0) {
                         day[size][employee.getId()] = 1;
