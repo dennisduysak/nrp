@@ -9,26 +9,26 @@ import java.util.List;
 public class Constraint {
     private SchedulingPeriod schedulingPeriod;
     private Helper helper;
-    private List<int[][]> solution;
+    private List<int[][]> roster;
 
-    public Constraint(SchedulingPeriod schedulingPeriod, List<int[][]> solution) {
+    public Constraint(SchedulingPeriod schedulingPeriod, List<int[][]> roster) {
         this.schedulingPeriod = schedulingPeriod;
         helper = new Helper(this.schedulingPeriod);
-        this.solution = solution;
+        this.roster = roster;
     }
 
     /**
-     * Prüft die solution auf harte Restriktionen
+     * Prüft die roster auf harte Restriktionen
      *
      * @return true, wenn die harten Restriktionen erfüllt wurden, false sonst
      */
-    private boolean checkHardConst() {
+    public boolean checkHardConst() {
         int employeeWorkAtOneDay = 0;
-        for (int i = 0; i < solution.size(); i++) {
+        for (int i = 0; i < roster.size(); i++) {
             List<Integer> requirementsForDay = helper.getRequirementsForDay(i);
             int employeeSize = helper.getEmployeeList().size();
             for (int j = 0; j < employeeSize; j++) {
-                int[][] shiftList = solution.get(i);
+                int[][] shiftList = roster.get(i);
                 for (int k = 0; k < helper.getShiftList().size(); k++) {
                     int demand = 0;
                     for (int l = 0; l < employeeSize; l++) {
@@ -39,7 +39,7 @@ public class Constraint {
                     } else if (demand < requirementsForDay.get(k)) {
                         return false;
                     }
-                    int[][] d = solution.get(i);
+                    int[][] d = roster.get(i);
                     employeeWorkAtOneDay += d[k][j];
                 }
                 if (employeeWorkAtOneDay > 1) {
@@ -58,15 +58,15 @@ public class Constraint {
      * @throws Exception wenn harte Restriktionen nicht erfüllt wurden
      */
     public int checkConstraints() throws Exception {
-        int strafpunkte = 0;
+        int penaltyPoints = 0;
         if (!checkHardConst()) {
             throw new Exception("Verstoß gegen harte Restriktion...");
         }
 
-        strafpunkte += checkNumbAssigment();
+        penaltyPoints += checkNumbAssigment();
 
 
-        return strafpunkte;
+        return penaltyPoints;
     }
 
     /**
@@ -81,7 +81,7 @@ public class Constraint {
         int employeeSize = helper.getEmployeeList().size();
         int shiftSize = helper.getShiftList().size();
         List<Integer> numbOfShiftInPeriod = new ArrayList<>(Collections.nCopies(employeeSize, 0));
-        for (int[][] aSolution : solution) {
+        for (int[][] aSolution : roster) {
             for (int k = 0; k < shiftSize; k++) {
                 for (int l = 0; l < employeeSize; l++) {
                     int temp = numbOfShiftInPeriod.get(l) + aSolution[k][l];
@@ -101,12 +101,12 @@ public class Constraint {
             int minDaysOfWork = c.getMinNumAssignments();
             if (c.getMaxNumAssignments_on() == 1) {
                 if (maxDaysOfWork < daysOfWork) {
-                    diffDays += daysOfWork - maxDaysOfWork;
+                    diffDays += (daysOfWork - maxDaysOfWork) * c.getMaxNumAssignments_weight();
                 }
             }
             if (c.getMinNumAssignments_on() == 1) {
                 if (minDaysOfWork > daysOfWork) {
-                    diffDays += minDaysOfWork - daysOfWork;
+                    diffDays += (minDaysOfWork - daysOfWork) * c.getMinNumAssignments_weight();
                 }
             }
             numbOfDiffDays.add(diffDays);
