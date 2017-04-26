@@ -1,4 +1,4 @@
-package attributes;
+package Attributes;
 
 public class Cover {
     private String shift;

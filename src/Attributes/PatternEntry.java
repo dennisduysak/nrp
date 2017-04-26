@@ -1,7 +1,4 @@
-package attributes;
-
-import java.util.Date;
-import java.util.List;
+package Attributes;
 
 public class PatternEntry {
     private int index;

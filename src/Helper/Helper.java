@@ -1,4 +1,6 @@
-import attributes.*;
+package Helper;
+
+import Attributes.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,8 +80,8 @@ public class Helper {
      * @param daysAfterStart Anzahl der Tage nach beginn der Periode
      * @return Liste von Integern mit Bedarf
      */
-    public List<Integer> getRequirementsForDay(int daysAfterStart) {
-        List<Integer> requirements = new ArrayList<>();
+    public List<RequirementsForDay> getRequirementsForDay(int daysAfterStart) {
+        List<RequirementsForDay> requirements = new ArrayList<>();
         List<Shift> shiftList = getShiftList();
         int dhIndex = 99;
         for (int i = 0; i < shiftList.size(); i++) {
@@ -89,12 +91,12 @@ public class Helper {
                 dhIndex = i;
                 //ansonsten füge in die req-Liste den Bedarf für den Tag und Schicht hinzu
             } else {
-                requirements.add(getRequirement(shiftId, daysAfterStart));
+                requirements.add(new RequirementsForDay(getRequirement(shiftId, daysAfterStart), shiftId));
             }
         }
         //füge den Bedarf der Oberschwester an den Listenanfang
         if (dhIndex != 99) {
-            requirements.add(0, getRequirement(shiftList.get(dhIndex).getId(), daysAfterStart));
+            requirements.add(0, new RequirementsForDay(getRequirement(shiftList.get(dhIndex).getId(), daysAfterStart), shiftList.get(dhIndex).getId()));
         }
         return requirements;
     }

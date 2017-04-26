@@ -1,4 +1,6 @@
-import attributes.SchedulingPeriod;
+package Helper;
+
+import Attributes.SchedulingPeriod;
 
 import java.util.List;
 import java.util.Random;
@@ -7,7 +9,7 @@ public class SimulatedAnnealing {
     private Solution initialSolution;
     private SchedulingPeriod schedulingPeriod;
 
-    SimulatedAnnealing(Solution initialSolution, SchedulingPeriod schedulingPeriod) {
+    public SimulatedAnnealing(Solution initialSolution, SchedulingPeriod schedulingPeriod) {
         this.initialSolution = initialSolution;
         this.schedulingPeriod = schedulingPeriod;
     }
