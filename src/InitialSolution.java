@@ -30,10 +30,12 @@ public class InitialSolution {
         int shiftTypeSize = shiftList.size();
         int nurseCounter = 0;
 
+
         for (int i = 0; i < helper.getDaysInPeriod(); i++) {
             int[][] day = new int[shiftTypeSize][employeeSize];
             List<Integer> requirementsForDay = helper.getRequirementsForDay(i);
             int size = requirementsForDay.size() - 1;
+            int shiftSize = requirementsForDay.size(); // um später zwischen dateien mit DH und ohne DH Schicht unterscheiden zu können
 
             for (int j = 0; j < 999; j++) {
                 if (nurseCounter > employeeSize - 1) {
@@ -50,7 +52,9 @@ public class InitialSolution {
                     dhReq--;
                     requirementsForDay.set(0, dhReq);
                     //Wenn keine Oberschwester => Zuteilung um den Bedarf zu decken
-                } else if (day[size][employee.getId()] != 1 ) {
+                    // für, wenn DH Schichten da sind (also Anzahl Schichten >4)
+                    // anstatt shiftSize >4, überprüfen shift.getShifts().contains(Shift.DH)
+                } else if (day[size][employee.getId()] != 1  && size != 0 && shiftSize >4) {
                     int reqShift = requirementsForDay.get(size);
                     if (reqShift > 0) {
                         day[size][employee.getId()] = 1;
@@ -61,6 +65,19 @@ public class InitialSolution {
                         nurseCounter--;
                     }
                 }
+                // für wenn keine DH Schichten da sind, Anzahl Schichten also <=3
+                else if(day[size][employee.getId()] != 1) {
+                    int reqShift = requirementsForDay.get(size);
+                    if (reqShift > 0) {
+                        day[size][employee.getId()] = 1;
+                        reqShift--;
+                        requirementsForDay.set(size, reqShift);
+                    } else {
+                        size--;
+                        nurseCounter--;
+                    }
+                }
+
                 nurseCounter++;
             }
             solutionMatrix.add(day);
