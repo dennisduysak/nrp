@@ -15,13 +15,13 @@ public class main {
 
         //Initiallösung auf Restriktionen prüfen und bewerten
         Constraint constraint = new Constraint(schedulingPeriod, initialRoster);
-        int initialScore = constraint.checkConstraints();
+        int initialScore = constraint.calcRosterScore();
 
         Solution initial = new Solution(initialRoster, initialScore);
 
         SimulatedAnnealing sa = new SimulatedAnnealing(initial, schedulingPeriod);
-        int startingTemperature = 100;
-        int coolingRate = 10;
+        double startingTemperature = 5;
+        double coolingRate = 1.3;
         Solution betterSolution = sa.doAlg(startingTemperature, coolingRate);
 
         System.out.println("Strafpunkte der Initiallösung: " + initialScore);

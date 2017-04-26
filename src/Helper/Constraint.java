@@ -59,14 +59,12 @@ public class Constraint {
      * @return Strafpunkte
      * @throws Exception wenn harte Restriktionen nicht erfüllt wurden
      */
-    public int checkConstraints() throws Exception {
+    public int calcRosterScore() throws Exception {
         int penaltyPoints = 0;
         if (!checkHardConst()) {
             throw new Exception("Verstoß gegen harte Restriktion...");
         }
-
         penaltyPoints += checkNumbAssigment();
-
 
         return penaltyPoints;
     }
