@@ -1,4 +1,4 @@
-package attributes;
+package Attributes;
 
 import java.util.List;
 

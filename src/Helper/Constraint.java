@@ -1,6 +1,8 @@
-import attributes.Contract;
-import attributes.Employee;
-import attributes.SchedulingPeriod;
+package Helper;
+
+import Attributes.Contract;
+import Attributes.Employee;
+import Attributes.SchedulingPeriod;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +27,7 @@ public class Constraint {
     public boolean checkHardConst() {
         int employeeWorkAtOneDay = 0;
         for (int i = 0; i < roster.size(); i++) {
-            List<Integer> requirementsForDay = helper.getRequirementsForDay(i);
+            List<RequirementsForDay> requirementsForDay = helper.getRequirementsForDay(i);
             int employeeSize = helper.getEmployeeList().size();
             for (int j = 0; j < employeeSize; j++) {
                 int[][] shiftList = roster.get(i);
@@ -34,9 +36,9 @@ public class Constraint {
                     for (int l = 0; l < employeeSize; l++) {
                         demand += shiftList[k][l];
                     }
-                    if (demand > requirementsForDay.get(k)) {
+                    if (demand > requirementsForDay.get(k).getDemand()) {
                         return false;
-                    } else if (demand < requirementsForDay.get(k)) {
+                    } else if (demand < requirementsForDay.get(k).getDemand()) {
                         return false;
                     }
                     int[][] d = roster.get(i);

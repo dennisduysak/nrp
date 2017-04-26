@@ -1,9 +1,10 @@
-package attributes;
+package Attributes;
 
 import java.util.Date;
 
-public class DayOff {
+public class ShiftOff {
     private int weight;
+    private String shiftTypeId;
     private int employeeId;
     private Date date;
 
@@ -13,6 +14,14 @@ public class DayOff {
 
     public void setWeight(int weight) {
         this.weight = weight;
+    }
+
+    public String getShiftTypeId() {
+        return shiftTypeId;
+    }
+
+    public void setShiftTypeId(String shiftTypeId) {
+        this.shiftTypeId = shiftTypeId;
     }
 
     public int getEmployeeId() {
