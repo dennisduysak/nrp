@@ -25,5 +25,6 @@ public class main {
         Solution betterSolution = sa.doAlg(startingTemperature, coolingRate);
 
         System.out.println("Strafpunkte der Initiallösung: " + initialScore);
+        System.out.println("Strafpunkte der Verbesserung: " + betterSolution.getScore());
     }
 }
