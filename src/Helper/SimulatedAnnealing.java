@@ -14,7 +14,7 @@ public class SimulatedAnnealing {
         this.schedulingPeriod = schedulingPeriod;
     }
 
-    public Solution doAlg(double startingTemperature, double coolingRate) throws Exception {
+    public Solution doSimulatedAnnealing(double startingTemperature, double coolingRate) throws Exception {
         int numberOfIterations = (int) (startingTemperature / coolingRate);
         for (int i = 0; i < numberOfIterations; i++) {
             int score = initialSolution.getScore();
@@ -44,9 +44,9 @@ public class SimulatedAnnealing {
         Random random = new Random();
 
         List<int[][]> newRoster = oldRoster;
-        Constraint constraint;
+        Constraint constraint = new Constraint(schedulingPeriod, newRoster);
 
-        do {
+        while (!constraint.checkHardConst()) {
             int randomDay1 = random.nextInt(daySize);
             int randomDay2 = random.nextInt(daySize);
             int shift1 = random.nextInt(shiftSize);
@@ -71,7 +71,7 @@ public class SimulatedAnnealing {
             newRoster.set(randomDay2, i);
 
             constraint = new Constraint(schedulingPeriod, newRoster);
-        } while (!constraint.checkHardConst());
+        }
 
         return new Solution(newRoster, constraint.calcRosterScore());
     }
