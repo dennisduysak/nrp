@@ -14,6 +14,14 @@ public class SimulatedAnnealing {
         this.schedulingPeriod = schedulingPeriod;
     }
 
+    /**
+     *
+     * Führt den Simulated Annealin Algorithmus aus
+     * @param startingTemperature StartTemperatur
+     * @param coolingRate Abkühlungsrate
+     * @return neue "verbesserte" Solution
+     * @throws Exception wenn harte Restriktionen nicht erfüllt wurden
+     */
     public Solution doSimulatedAnnealing(double startingTemperature, double coolingRate) throws Exception {
         int numberOfIterations = (int) (startingTemperature / coolingRate);
         for (int i = 0; i < numberOfIterations; i++) {

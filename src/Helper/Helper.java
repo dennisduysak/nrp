@@ -4,6 +4,7 @@ import Attributes.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,6 +39,17 @@ public class Helper {
     }
 
     /**
+     * Gibt aus schedulingPeriod die Contract-Liste wieder
+     *
+     * @return Liste der Mitarbeiten
+     */
+    public List<Contract> getContractList() {
+        return schedulingPeriod.getContracts().stream()
+                .map(object -> (Contract) object)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Gibt aus schedulingPeriod die Schicht-Liste wieder
      *
      * @return Liste der Schichten
@@ -45,6 +57,28 @@ public class Helper {
     public List<Shift> getShiftList() {
         return schedulingPeriod.getShiftTypes().stream()
                 .map(object -> (Shift) object)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gibt aus schedulingPeriod die DayOff-Wunsch-Liste wieder
+     *
+     * @return Liste der Wünsche
+     */
+    public List<DayOff> getDayOffRequestList() {
+        return schedulingPeriod.getDayOffRequests().stream()
+                .map(object -> (DayOff) object)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gibt aus schedulingPeriod die DayOff-Wunsch-Liste wieder
+     *
+     * @return Liste der Wünsche
+     */
+    public List<ShiftOff> getShiftOffRequestList() {
+        return schedulingPeriod.getShiftOffRequests().stream()
+                .map(object -> (ShiftOff) object)
                 .collect(Collectors.toList());
     }
 
@@ -102,13 +136,28 @@ public class Helper {
     }
 
     /**
-     * Zählt die Tage zwischen Anfang und Ende der Periode
+     * Gibt eine Liste der Schichten zurück, in der Reihenfolge wie im Roster
      *
-     * @return Anzahl an Tagen
+     * @return String-Liste von Schichten
      */
-    public int getDaysInPeriod() {
-        long diff = schedulingPeriod.getEndDate().getTime() - schedulingPeriod.getStartDate().getTime();
-        return (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+    public List<String> getShiftWithIndices() {
+        List<Shift> shiftList = getShiftList();
+        List<String> shiftWithIndices = new ArrayList<>();
+        int dhIndex = 99;
+        for (int i = 0; i < shiftList.size(); i++) {
+            String shiftId = shiftList.get(i).getId();
+            //Wenn DH, dann Index merken
+            if (shiftId.equals("DH")) {
+                dhIndex = i;
+            } else {
+                shiftWithIndices.add(shiftId);
+            }
+        }
+        //füge Oberschwester an den Listenanfang
+        if (dhIndex != 99) {
+            shiftWithIndices.add(0, shiftList.get(dhIndex).getId());
+        }
+        return shiftWithIndices;
     }
 
     /**
@@ -135,5 +184,52 @@ public class Helper {
                 return Day.Saturday;
         }
         return null;
+    }
+
+    /**
+     * Gibt die Anzahl an Tagen zwischen zwei Dati an
+     *
+     * @param start Startdatum
+     * @param end   Enddatum
+     * @return Anzahl an Tagen zwischen Start und End
+     */
+    private int calcDays(Date start, Date end) {
+        long diff = end.getTime() - start.getTime();
+        return (int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) + 1;
+    }
+
+    /**
+     * Zählt die Tage zwischen Anfang und Ende der Periode
+     *
+     * @return Anzahl der Tage
+     */
+    public int getDaysInPeriod() {
+        return calcDays(schedulingPeriod.getStartDate(), schedulingPeriod.getEndDate());
+    }
+
+    /**
+     * Zählt die Tage zwischen Anfang und date
+     *
+     * @param date Datumswert, bis wann gezählt werden soll
+     * @return Anzahl der Tage
+     */
+    public int getDaysFromStart(Date date) {
+        return calcDays(schedulingPeriod.getStartDate(), date);
+    }
+
+    public List<List<Integer>> getWorkingList(List<int[][]> roster) {
+        List<List<Integer>> workOnDayPeriode = new ArrayList<>();
+        for (int i = 0; i < roster.size(); i++) {
+            List<Integer> workOnDayList = new ArrayList<>();
+            for (int k = 0; k < getEmployeeList().size(); k++) {
+                int workOnDay = 0;
+                for (int j = 0; j < roster.get(0).length; j++) {
+                    workOnDay += roster.get(i)[j][k];
+                }
+                workOnDayList.add(workOnDay);
+            }
+            workOnDayPeriode.add(workOnDayList);
+        }
+        return workOnDayPeriode;
     }
 }

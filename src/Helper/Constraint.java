@@ -1,9 +1,6 @@
 package Helper;
 
-import Attributes.Contract;
-import Attributes.Employee;
-import Attributes.SchedulingPeriod;
-import Attributes.Skill;
+import Attributes.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,13 +69,148 @@ public class Constraint {
      * @throws Exception wenn harte Restriktionen nicht erfüllt wurden
      */
     public int calcRosterScore() throws Exception {
-        int penaltyPoints = 0;
+        int punishmentPoints = 0;
         if (!checkHardConst()) {
             throw new Exception("Verstoß gegen harte Restriktion...");
         }
-        penaltyPoints += checkNumbAssigment();
+        punishmentPoints += checkNumbAssigment();
 
-        return penaltyPoints;
+        punishmentPoints += checkMaxConsecutiveWorkingDays();
+        punishmentPoints += checkMaxConsecutiveFreeDays();
+
+        punishmentPoints += checkDayOffRequest();
+        punishmentPoints += checkShiftOffRequest();
+
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft die aufeinanderfolgende Arbeitstage gegen die im Vertrag vereinbarte maximalgröße.
+     * Für jeden Tag extra, wird ein weiterer Strafpunkt verteilt
+     *
+     * @return Strafpunkt
+     */
+    private int checkMaxConsecutiveWorkingDays() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints = 0;
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                if (workOnDayPeriode.get(i).get(j) == 1) {
+                    int employeeContractId = employeeList.get(j).getContractId();
+                    Contract currentContract = contractList.get(employeeContractId);
+                    int maxConsecutiveWorkingDays = currentContract.getMaxConsecutiveWorkingDays();
+                    if (currentContract.getMaxConsecutiveWorkingDays_on() == 1) {
+                        int counter = 0;
+                        if (workOnDayPeriode.size() < i + currentContract.getMaxConsecutiveWorkingDays() + 1) {
+                            for (int k = 0; k < maxConsecutiveWorkingDays + 1; k++) {
+                                counter += workOnDayPeriode.get(k).get(j);
+                            }
+                            if (counter == maxConsecutiveWorkingDays + 1) {
+                                punishmentPoints += currentContract.getMaxConsecutiveWorkingDays_weight();
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft die aufeinanderfolgende freie Tage gegen die im Vertrag vereinbarte maximalgröße.
+     * Für jeden Tag extra, wird ein weiterer Strafpunkt verteilt
+     *
+     * @return Strafpunkt
+     */
+    private int checkMaxConsecutiveFreeDays() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints = 0;
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                if (workOnDayPeriode.get(i).get(j) == 0) {
+                    int employeeContractId = employeeList.get(j).getContractId();
+                    Contract currentContract = contractList.get(employeeContractId);
+                    int maxConsecutiveFreeDays = currentContract.getMaxConsecutiveFreeDays();
+                    if (currentContract.getMaxConsecutiveFreeDays_on() == 1) {
+                        int counter = 0;
+                        if (workOnDayPeriode.size() < i + currentContract.getMaxConsecutiveFreeDays() + 1) {
+                            for (int k = 0; k < maxConsecutiveFreeDays + 1; k++) {
+                                counter += workOnDayPeriode.get(k).get(j);
+                            }
+                            if (counter == 0) {
+                                punishmentPoints += currentContract.getMaxConsecutiveFreeDays_weight();
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft und zählt die Schichten, an dem sich die employees frei gewünscht haben, sie aber trotzdem arbeiten Müssen
+     *
+     * @return Strafpunkte
+     */
+    private int checkShiftOffRequest() {
+        List<ShiftOff> shiftOff = helper.getShiftOffRequestList();
+        List<String> shiftWithIndices = helper.getShiftWithIndices();
+        int counter = 0;
+        for (ShiftOff s : shiftOff) {
+            int dayNumber = helper.getDaysFromStart(s.getDate()) - 1;
+            int index = shiftWithIndices.indexOf(s.getShiftTypeId());
+            int workShiftToday = roster.get(dayNumber)[index][s.getEmployeeId()];
+            if (workShiftToday == 1) {
+                counter += s.getWeight();
+            }
+        }
+        return counter;
+    }
+
+    /**
+     * Prüft und zählt die Tage, an dem sich die employees frei gewünscht haben, sie aber trotzdem arbeiten Müssen
+     *
+     * @return Strafpunkte
+     * @throws Exception wenn harte Restriktionen nicht erfüllt wurden
+     */
+    private int checkDayOffRequest() throws Exception {
+        List<DayOff> dayOff = helper.getDayOffRequestList();
+        int counter = 0;
+        for (DayOff d : dayOff) {
+            int dayNumber = helper.getDaysFromStart(d.getDate()) - 1;
+            int worksToday = worksToday(d.getEmployeeId(), dayNumber);
+            if (worksToday == 1) {
+                counter += d.getWeight();
+            }
+        }
+        return counter;
+    }
+
+    /**
+     * Gibt an ob ein employee x am Tag y arbeitet.
+     *
+     * @param employeeId EmployeeID
+     * @param dayNumber Der Tag nach beginn der Periode (Also wenn die Woche am Montag beginnt, wäre der erste Mittwoch eine 3)
+     * @return 1, wenn employee an dem Tag arbeitet (egal welche Schicht), 0 sonst
+     * @throws Exception
+     */
+    private int worksToday(int employeeId, int dayNumber) throws Exception {
+        int[][] j = roster.get(dayNumber);
+        int worksToday = 0;
+        for (int i = 0; i < roster.get(dayNumber).length; i++) {
+            worksToday += j[i][employeeId];
+        }
+        if (worksToday > 1) {
+            throw new Exception("Verstoß gegen harte Restriktion...");
+        }
+        return worksToday;
     }
 
     /**
