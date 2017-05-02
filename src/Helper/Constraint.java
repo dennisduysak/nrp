@@ -95,15 +95,20 @@ public class Constraint {
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
+        //für alle employee
         for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            //für alle Tage
             for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                //wenn ein Arbeitstag
                 if (workOnDayPeriode.get(i).get(j) == 1) {
                     int employeeContractId = employeeList.get(j).getContractId();
                     Contract currentContract = contractList.get(employeeContractId);
                     int maxConsecutiveWorkingDays = currentContract.getMaxConsecutiveWorkingDays();
                     if (currentContract.getMaxConsecutiveWorkingDays_on() == 1) {
                         int counter = 0;
+                        //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() < i + currentContract.getMaxConsecutiveWorkingDays() + 1) {
+                            //Zähle alle Tage vom aktuellen bis MaxConDays + 1 zusammen
                             for (int k = 0; k < maxConsecutiveWorkingDays + 1; k++) {
                                 counter += workOnDayPeriode.get(k).get(j);
                             }
@@ -130,15 +135,20 @@ public class Constraint {
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
+        //für alle employee
         for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            //für alle Tage
             for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                //Wenn KEIN Arbeitstag
                 if (workOnDayPeriode.get(i).get(j) == 0) {
                     int employeeContractId = employeeList.get(j).getContractId();
                     Contract currentContract = contractList.get(employeeContractId);
                     int maxConsecutiveFreeDays = currentContract.getMaxConsecutiveFreeDays();
                     if (currentContract.getMaxConsecutiveFreeDays_on() == 1) {
                         int counter = 0;
+                        //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() < i + currentContract.getMaxConsecutiveFreeDays() + 1) {
+                            //Zähle alle Tage vom aktuellen bis MaxConDays + 1 zusammen
                             for (int k = 0; k < maxConsecutiveFreeDays + 1; k++) {
                                 counter += workOnDayPeriode.get(k).get(j);
                             }
