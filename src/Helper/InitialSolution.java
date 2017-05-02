@@ -8,12 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InitialSolution {
-    private static SchedulingPeriod schedulingPeriod;
     private Helper helper;
 
     public InitialSolution(SchedulingPeriod schedulingPeriod) {
-        this.schedulingPeriod = schedulingPeriod;
-        helper = new Helper(this.schedulingPeriod);
+        helper = new Helper(schedulingPeriod);
     }
 
     /**
@@ -74,7 +72,11 @@ public class InitialSolution {
 
                     if (requirementsForDay.get(j).getDemand() == 0) {
                         //Merke die Stelle von Employee und breche ab
-                        employeeCount = k + 1;
+                        if (k >= employeeSize - 1) {
+                            employeeCount = 0;
+                        } else {
+                            employeeCount = k + 1;
+                        }
                         break;
                     }
                     //wenn Employee beim letzten angekommen ist, fange for-Schleife von vorne an
