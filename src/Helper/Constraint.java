@@ -107,14 +107,13 @@ public class Constraint {
                     if (currentContract.getMaxConsecutiveWorkingDays_on() == 1) {
                         int counter = 0;
                         //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
-                        if (workOnDayPeriode.size() < i + currentContract.getMaxConsecutiveWorkingDays() + 1) {
+                        if (workOnDayPeriode.size() > i + currentContract.getMaxConsecutiveWorkingDays()) {
                             //Zähle alle Tage vom aktuellen bis MaxConDays + 1 zusammen
                             for (int k = 0; k < maxConsecutiveWorkingDays + 1; k++) {
-                                counter += workOnDayPeriode.get(k).get(j);
+                                counter += workOnDayPeriode.get(i + k).get(j);
                             }
                             if (counter == maxConsecutiveWorkingDays + 1) {
                                 punishmentPoints += currentContract.getMaxConsecutiveWorkingDays_weight();
-
                             }
                         }
                     }
@@ -147,10 +146,10 @@ public class Constraint {
                     if (currentContract.getMaxConsecutiveFreeDays_on() == 1) {
                         int counter = 0;
                         //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
-                        if (workOnDayPeriode.size() < i + currentContract.getMaxConsecutiveFreeDays() + 1) {
+                        if (workOnDayPeriode.size() > i + currentContract.getMaxConsecutiveFreeDays()) {
                             //Zähle alle Tage vom aktuellen bis MaxConDays + 1 zusammen
                             for (int k = 0; k < maxConsecutiveFreeDays + 1; k++) {
-                                counter += workOnDayPeriode.get(k).get(j);
+                                counter += workOnDayPeriode.get(i + k).get(j);
                             }
                             if (counter == 0) {
                                 punishmentPoints += currentContract.getMaxConsecutiveFreeDays_weight();
@@ -207,7 +206,7 @@ public class Constraint {
      * Gibt an ob ein employee x am Tag y arbeitet.
      *
      * @param employeeId EmployeeID
-     * @param dayNumber Der Tag nach beginn der Periode (Also wenn die Woche am Montag beginnt, wäre der erste Mittwoch eine 3)
+     * @param dayNumber  Der Tag nach beginn der Periode (Also wenn die Woche am Montag beginnt, wäre der erste Mittwoch eine 3)
      * @return 1, wenn employee an dem Tag arbeitet (egal welche Schicht), 0 sonst
      * @throws Exception
      */
