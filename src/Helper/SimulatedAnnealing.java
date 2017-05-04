@@ -28,20 +28,32 @@ public class SimulatedAnnealing {
      */
     public Solution doSimulatedAnnealing(double startingTemperature, double coolingRate) throws Exception {
         int numberOfIterations = (int) (startingTemperature / coolingRate);
+        Solution bestSolution = initialSolution;
         for (int i = 0; i < numberOfIterations; i++) {
             int score = initialSolution.getScore();
             Solution newSolution = mutatedSolution(initialSolution.getRoster());
             double newScore = newSolution.getScore();
-            if (newScore < score) {
+            if (newScore > score) {
                 double e = Math.exp((newScore - score) / i);
                 if (e > Math.random()) {
                     initialSolution = newSolution;
+                    if (initialSolution.getScore() < bestSolution.getScore()){
+                        bestSolution = initialSolution;
+                    }
                 }
             } else {
                 initialSolution = newSolution;
+                if (initialSolution.getScore() < bestSolution.getScore()){
+                    bestSolution = initialSolution;
+                }
             }
         }
-        return initialSolution;
+        if (initialSolution.getScore() < bestSolution.getScore()){
+            return initialSolution;
+        } else {
+            return bestSolution;
+        }
+        //return initialSolution;
     }
 
     /**
