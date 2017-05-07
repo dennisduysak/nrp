@@ -232,4 +232,17 @@ public class Helper {
         }
         return workOnDayPeriode;
     }
+
+    /**
+     * Gibt den Wochentag des Tages wieder
+     *
+     * @param day Tag der Periode (von 0 anfangend)
+     * @return passenden Wochentag
+     */
+    public Day getWeekDayOfPeriode(int day) {
+        Calendar c = Calendar.getInstance();
+        c.setTime(schedulingPeriod.getStartDate());
+        c.add(Calendar.DATE, day);
+        return getWeekDay(c.get(Calendar.DAY_OF_WEEK));
+    }
 }
