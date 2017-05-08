@@ -76,7 +76,11 @@ public class Constraint {
         punishmentPoints += checkNumbAssigment();
 
         punishmentPoints += checkMaxConsecutiveWorkingDays();
+        punishmentPoints += checkMinConsecutiveWorkingDays();
         punishmentPoints += checkMaxConsecutiveFreeDays();
+        punishmentPoints += checkMinConsecutiveFreeDays();
+        punishmentPoints += checkMaxConsecutiveWorkingWeekends();
+        //punishmentPoints += checkMinConsecutiveWorkingWeekends();
 
         punishmentPoints += checkDayOffRequest();
         punishmentPoints += checkShiftOffRequest();
@@ -97,13 +101,13 @@ public class Constraint {
         int punishmentPoints = 0;
         //für alle employee
         for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int employeeContractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(employeeContractId);
+            int maxConsecutiveWorkingDays = currentContract.getMaxConsecutiveWorkingDays();
             //für alle Tage
             for (int i = 0; i < workOnDayPeriode.size(); i++) {
                 //wenn ein Arbeitstag
                 if (workOnDayPeriode.get(i).get(j) == 1) {
-                    int employeeContractId = employeeList.get(j).getContractId();
-                    Contract currentContract = contractList.get(employeeContractId);
-                    int maxConsecutiveWorkingDays = currentContract.getMaxConsecutiveWorkingDays();
                     if (currentContract.getMaxConsecutiveWorkingDays_on() == 1) {
                         int counter = 0;
                         //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
@@ -115,6 +119,76 @@ public class Constraint {
                             if (counter == maxConsecutiveWorkingDays + 1) {
                                 punishmentPoints += currentContract.getMaxConsecutiveWorkingDays_weight();
                             }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft die aufeinanderfolgende Arbeitstage gegen die im Vertrag vereinbarte minimalgröße.
+     * Bei unterschreitung der minimalgröße => Strafpunkt
+     *
+     * @return Strafpunkt
+     */
+    private int checkMinConsecutiveWorkingDays() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints = 0;
+        //für alle employee
+        for (int j = 0; j < employeeList.size(); j++) {
+            int employeeContractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(employeeContractId);
+            int minConsecutiveWorkingDays = currentContract.getMinConsecutiveWorkingDays();
+            //für alle Tage
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                int counter = 0;
+
+                if (currentContract.getMinConsecutiveWorkingDays_on() == 1) {
+                    //Sonderfall: erster Tag in Periode
+                    if (i == 0 && workOnDayPeriode.get(i).get(j) == 1) {
+
+                        //Zähle alle Arbeitstage von i bis minConWorkingDays
+                        for (int k = 0; k < minConsecutiveWorkingDays; k++) {
+                            counter += workOnDayPeriode.get(k).get(j);
+                        }
+                        if (counter < minConsecutiveWorkingDays) {
+                            punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight();
+                        }
+                    }
+                    //wenn Anfang einer konsekutiven Reihe von Arbeitstagen
+                    else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 0 && workOnDayPeriode.get(i + 1).get(j) == 1) {
+
+                        //wenn aktueller Tag + MinConDays noch innerhalb der Periode liegt
+                        if (workOnDayPeriode.size() > i + currentContract.getMinConsecutiveWorkingDays()) {
+                            //Zähle alle Tage vom morgigen bis MinConDays
+                            for (int k = i + 1; k < minConsecutiveWorkingDays; k++) {
+                                // Abfrage, ob die Konsekutive Reihe von Arbeitstagen beendet ist
+                                if (workOnDayPeriode.get(k).get(j) == 1) {
+                                    counter++;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        // wenn nicht mehr innerhalb der Periode, zähle Arbeitstage bis Ende der Persiode
+                        else {
+                            //Zähle alle Tage vom morgigen bis Ende der Persiode
+                            for (int k = i + 1; k < workOnDayPeriode.size(); k++) {
+                                // Abfrage, ob die Konsekutive Reihe von Arbeitstagen beendet ist
+                                if (workOnDayPeriode.get(k).get(j) == 1) {
+                                    counter++;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        if (counter < minConsecutiveWorkingDays) {
+                            counter = minConsecutiveWorkingDays - counter;
+                            punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight() * counter;
                         }
                     }
                 }
@@ -136,13 +210,13 @@ public class Constraint {
         int punishmentPoints = 0;
         //für alle employee
         for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int employeeContractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(employeeContractId);
+            int maxConsecutiveFreeDays = currentContract.getMaxConsecutiveFreeDays();
             //für alle Tage
             for (int i = 0; i < workOnDayPeriode.size(); i++) {
                 //Wenn KEIN Arbeitstag
                 if (workOnDayPeriode.get(i).get(j) == 0) {
-                    int employeeContractId = employeeList.get(j).getContractId();
-                    Contract currentContract = contractList.get(employeeContractId);
-                    int maxConsecutiveFreeDays = currentContract.getMaxConsecutiveFreeDays();
                     if (currentContract.getMaxConsecutiveFreeDays_on() == 1) {
                         int counter = 0;
                         //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
@@ -153,8 +227,105 @@ public class Constraint {
                             }
                             if (counter == 0) {
                                 punishmentPoints += currentContract.getMaxConsecutiveFreeDays_weight();
-
                             }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft die aufeinanderfolgende freien Arbeitstage gegen die im Vertrag vereinbarte minimalgröße.
+     * Bei unterschreitung der minimalgröße => Strafpunkt
+     *
+     * @return Strafpunkt
+     */
+    private int checkMinConsecutiveFreeDays() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints = 0;
+        //für alle employee
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int employeeContractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(employeeContractId);
+            int minConsecutiveFreeDays = currentContract.getMinConsecutiveFreeDays();
+            //für alle Tage
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                int counter = 0;
+
+                if (currentContract.getMinConsecutiveFreeDays_on() == 1) {
+                    //Sonderfall: erster Tag in Periode
+                    if (i == 0 && workOnDayPeriode.get(i).get(j) == 0) {
+
+                        //Zähle alle Arbeitstage von i bis minConWorkingDays
+                        for (int k = 0; k < minConsecutiveFreeDays; k++) {
+                            if (workOnDayPeriode.get(k).get(j) == 1) {
+                                counter += 1;
+                            }
+                        }
+                        if (counter < minConsecutiveFreeDays) {
+                            punishmentPoints += currentContract.getMinConsecutiveFreeDays_weight();
+                        }
+                    }
+                    //wenn Angang einer Arbeitstagreihe
+                    else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 1 && workOnDayPeriode.get(i + 1).get(j) == 0) {
+
+                        //wenn aktueller Tag + MinConDays noch innerhalb der Periode liegt
+                        if (workOnDayPeriode.size() > i + currentContract.getMinConsecutiveFreeDays()) {
+                            //Zähle alle Tage vom morgigen bis MinConDays
+                            for (int k = 0; k < minConsecutiveFreeDays; k++) {
+                                if (workOnDayPeriode.get(i + k + 1).get(j) == 0) {
+                                    counter += 1;
+                                }
+                            }
+                            if (counter < minConsecutiveFreeDays) {
+                                punishmentPoints += currentContract.getMinConsecutiveFreeDays_weight();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft die aufeinanderfolgende Wochenenden gegen die im Vertrag vereinbarte maximalgröße.
+     * Bei überschreitung der maximalgröße => Strafpunkt
+     *
+     * @return Strafpunkt
+     */
+    private int checkMaxConsecutiveWorkingWeekends() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints = 0;
+        //für alle employee
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int contractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(contractId);
+            List<Day> weekendDefinition = currentContract.getWeekendDefinition();
+            int countWorkAtWeekend = 0;
+            //für alle Tage
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                if (currentContract.getMaxConsecutiveWorkingWeekends_on() == 1) {
+                    Day currentDay = helper.getWeekDayOfPeriode(i);
+
+                    if (weekendDefinition.contains(currentDay)) {
+                        int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
+                        boolean workAtWeekend = false;
+                        for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                            if (workOnDayPeriode.get(k).get(j) == 1) {
+                                workAtWeekend = true;
+                                break;
+                            }
+                        }
+                        if (workAtWeekend) {
+                            countWorkAtWeekend++;
+                            i += weekendDefinition.size() - indexOfWeekendDefinition;
                         }
                     }
                 }
