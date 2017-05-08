@@ -139,7 +139,7 @@ public class Constraint {
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
         //für alle employee
-        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+        for (int j = 0; j < employeeList.size(); j++) {
             int employeeContractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(employeeContractId);
             int minConsecutiveWorkingDays = currentContract.getMinConsecutiveWorkingDays();
@@ -159,17 +159,42 @@ public class Constraint {
                             punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight();
                         }
                     }
-                    //wenn Angang einer Arbeitstagreihe
+                    //wenn Anfang einer konsekutiven Reihe von Arbeitstagen
                     else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 0 && workOnDayPeriode.get(i + 1).get(j) == 1) {
 
                         //wenn aktueller Tag + MinConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() > i + currentContract.getMinConsecutiveWorkingDays()) {
                             //Zähle alle Tage vom morgigen bis MinConDays
                             for (int k = 0; k < minConsecutiveWorkingDays; k++) {
-                                counter += workOnDayPeriode.get(i + k + 1).get(j);
+                                // Abfrage, ob die Konsekutive Reihe von Arbeitstagen beendet ist
+                                if(workOnDayPeriode.get(i+k+1).get(j) == 1) {
+                                    counter += workOnDayPeriode.get(i + k + 1).get(j);
+                                }
+                                else{
+                                    break; // aus for schleife (z.168) raus
+                                }
                             }
                             if (counter < minConsecutiveWorkingDays) {
-                                punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight();
+                                counter = minConsecutiveWorkingDays - counter;
+                                punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight()*counter;
+                            }
+                        }
+                        // wenn nicht mehr innerhalb der Periode, kann es trotzdem passieren, das ich weniger wie das Minimum arbeite
+                        else {
+                            //Zähle alle Tage vom morgigen bis MinConDays, wenn Tag nicht mehr innerhalb Periode
+                            for (int k = i+1; k < workOnDayPeriode.get(0).size(); k++) {
+                                int m = 0;
+                                if(workOnDayPeriode.get(i+m+1).get(j) == 1) {
+                                    counter += workOnDayPeriode.get(i + m + 1).get(j);
+                                }
+                                else{
+                                    break;
+                                }
+                                m++;
+                            }
+                            if (counter < minConsecutiveWorkingDays) {
+                                counter = minConsecutiveWorkingDays - counter;
+                                punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight()*counter;
                             }
                         }
                     }
