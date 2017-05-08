@@ -287,19 +287,30 @@ public class Constraint {
         int punishmentPoints = 0;
         //für alle employee
         for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
-            int counter = 0;
-            int employeeContractId = employeeList.get(j).getContractId();
-            Contract currentContract = contractList.get(employeeContractId);
+            int contractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(contractId);
             List<Day> weekendDefinition = currentContract.getWeekendDefinition();
+            int countWorkAtWeekend = 0;
             //für alle Tage
             for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                Day currentDay = helper.getWeekDayOfPeriode(i);
                 if (currentContract.getMaxConsecutiveWorkingWeekends_on() == 1) {
-                    //Wenn Wochenende && Arbeitstag
-                    if (weekendDefinition.contains(currentDay) && workOnDayPeriode.get(i).get(j) == 1) {
-                        counter += currentContract.getMaxConsecutiveWorkingWeekends_weight();
+                    Day currentDay = helper.getWeekDayOfPeriode(i);
+
+                    if (weekendDefinition.contains(currentDay)) {
+                        int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
+                        boolean workAtWeekend = false;
+                        for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                            if (workOnDayPeriode.get(k).get(j) == 1) {
+                                workAtWeekend = true;
+                                break;
+                            }
+                        }
+                        if (workAtWeekend) {
+                            countWorkAtWeekend ++;
+                            i += weekendDefinition.size() - indexOfWeekendDefinition;
+                        }
                     }
-                }       //TODO: Aufeinanderfolgende Wochentage als ein Wochenende definieren. Wenn ein Tag in dem Zeitraum als Arbeitstag gilt, ist das gesamte WE ein Arbeitswe
+                }
             }
         }
         return punishmentPoints;
