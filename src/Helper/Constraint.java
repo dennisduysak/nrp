@@ -165,37 +165,30 @@ public class Constraint {
                         //wenn aktueller Tag + MinConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() > i + currentContract.getMinConsecutiveWorkingDays()) {
                             //Zähle alle Tage vom morgigen bis MinConDays
-                            for (int k = 0; k < minConsecutiveWorkingDays; k++) {
+                            for (int k = i + 1; k < minConsecutiveWorkingDays; k++) {
                                 // Abfrage, ob die Konsekutive Reihe von Arbeitstagen beendet ist
-                                if(workOnDayPeriode.get(i+k+1).get(j) == 1) {
-                                    counter += workOnDayPeriode.get(i + k + 1).get(j);
-                                }
-                                else{
-                                    break; // aus for schleife (z.168) raus
-                                }
-                            }
-                            if (counter < minConsecutiveWorkingDays) {
-                                counter = minConsecutiveWorkingDays - counter;
-                                punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight()*counter;
-                            }
-                        }
-                        // wenn nicht mehr innerhalb der Periode, kann es trotzdem passieren, das ich weniger wie das Minimum arbeite
-                        else {
-                            //Zähle alle Tage vom morgigen bis MinConDays, wenn Tag nicht mehr innerhalb Periode
-                            for (int k = i+1; k < workOnDayPeriode.get(0).size(); k++) {
-                                int m = 0;
-                                if(workOnDayPeriode.get(i+m+1).get(j) == 1) {
-                                    counter += workOnDayPeriode.get(i + m + 1).get(j);
-                                }
-                                else{
+                                if (workOnDayPeriode.get(k).get(j) == 1) {
+                                    counter++;
+                                } else {
                                     break;
                                 }
-                                m++;
                             }
-                            if (counter < minConsecutiveWorkingDays) {
-                                counter = minConsecutiveWorkingDays - counter;
-                                punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight()*counter;
+                        }
+                        // wenn nicht mehr innerhalb der Periode, zähle Arbeitstage bis Ende der Persiode
+                        else {
+                            //Zähle alle Tage vom morgigen bis Ende der Persiode
+                            for (int k = i + 1; k < workOnDayPeriode.size(); k++) {
+                                // Abfrage, ob die Konsekutive Reihe von Arbeitstagen beendet ist
+                                if (workOnDayPeriode.get(k).get(j) == 1) {
+                                    counter++;
+                                } else {
+                                    break;
+                                }
                             }
+                        }
+                        if (counter < minConsecutiveWorkingDays) {
+                            counter = minConsecutiveWorkingDays - counter;
+                            punishmentPoints += currentContract.getMinConsecutiveWorkingDays_weight() * counter;
                         }
                     }
                 }
@@ -331,7 +324,7 @@ public class Constraint {
                             }
                         }
                         if (workAtWeekend) {
-                            countWorkAtWeekend ++;
+                            countWorkAtWeekend++;
                             i += weekendDefinition.size() - indexOfWeekendDefinition;
                         }
                     }
