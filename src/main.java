@@ -1,12 +1,12 @@
-import Helper.*;
 import Attributes.SchedulingPeriod;
+import Helper.*;
 
 import java.util.List;
 
 public class main {
     public static void main(String argv[]) throws Exception {
         //Problem
-        XMLParser xmlParser = new XMLParser("toy1");
+        XMLParser xmlParser = new XMLParser("long01");
         SchedulingPeriod schedulingPeriod = xmlParser.parseXML();
 
         //Initiallösung
@@ -18,8 +18,8 @@ public class main {
         Solution initial = new Solution(initialRoster, constraint.calcRosterScore());
 
         SimulatedAnnealing sa = new SimulatedAnnealing(initial, schedulingPeriod);
-        double startingTemperature = 100;
-        double coolingRate = 1.3;
+        double startingTemperature = 1000;
+        double coolingRate = 0.5;
         Solution betterSolution = sa.doSimulatedAnnealing(startingTemperature, coolingRate);
 
         System.out.println("Strafpunkte der Initiallösung: " + initial.getScore());

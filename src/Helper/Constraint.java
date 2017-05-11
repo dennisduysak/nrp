@@ -83,6 +83,14 @@ public class Constraint {
         //punishmentPoints += checkMaxConsecutiveWorkingWeekends();
         //punishmentPoints += checkMinConsecutiveWorkingWeekends();
 
+        //completeWeekends (wenn sie am WE arbeitet dann an allen Tagen am WE, ansonsten strafpunkte für alle tage an den sie nicht arbeitet
+        //identicalShiftTypesDuringWE //nur ein Strafpunkt bei verstoß
+        //noNightShiftBeforeWE
+
+
+
+        //unwandetPattern
+
         punishmentPoints += checkDayOffRequest();
         punishmentPoints += checkShiftOffRequest();
 
@@ -156,8 +164,7 @@ public class Constraint {
                         for (int k = 0; k < minConsecutiveWorkingDays; k++) {
                             if (workOnDayPeriode.get(k).get(j) == 1) {
                                 counter++;
-                            }
-                            else {
+                            } else {
                                 break;
                             }
                         }
@@ -277,7 +284,7 @@ public class Constraint {
                         }
                         if (counter < minConsecutiveFreeDays) {
                             counter = minConsecutiveFreeDays - counter;
-                            punishmentPoints += currentContract.getMinConsecutiveFreeDays_weight()*counter;
+                            punishmentPoints += currentContract.getMinConsecutiveFreeDays_weight() * counter;
                         }
                     }
                     //wenn Angang einer Arbeitstagreihe
@@ -308,7 +315,7 @@ public class Constraint {
                         }
                         if (counter < minConsecutiveFreeDays) {
                             counter = minConsecutiveFreeDays - counter;
-                            punishmentPoints += currentContract.getMinConsecutiveFreeDays_weight()*counter;
+                            punishmentPoints += currentContract.getMinConsecutiveFreeDays_weight() * counter;
                         }
                     }
                 }
@@ -343,17 +350,19 @@ public class Constraint {
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         boolean workAtWeekend = false;
 
-                        if(workOnDayPeriode.size() > i + weekendDefinition.size()-1){
+                        //workAtWeekend anschauen; nach jeder iteration true oder false abfragen, bei true true (2 wochenenden am stück)
+
+
+                        if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
                             for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
-                                    if (workOnDayPeriode.get(i+k).get(j) == 1) {
-                                        workAtWeekend = true;
-                                        break;
-                                    }
+                                if (workOnDayPeriode.get(i + k).get(j) == 1) {
+                                    workAtWeekend = true;
+                                    break;
                                 }
                             }
-                        else {
-                            for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size()-i; k++) {
-                                if (workOnDayPeriode.get(i+k).get(j) == 1) {
+                        } else {
+                            for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                                if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                     workAtWeekend = true;
                                     break;
                                 }
@@ -366,8 +375,8 @@ public class Constraint {
                     }
                 }
             }
-            if(countWorkAtWeekend > currentContract.getMaxWorkingWeekendsInFourWeeks()){
-                punishmentPoints = (countWorkAtWeekend - currentContract.getMaxWorkingWeekendsInFourWeeks())*currentContract.getMaxWorkingWeekendsInFourWeeks_weight();
+            if (countWorkAtWeekend > currentContract.getMaxWorkingWeekendsInFourWeeks()) {
+                punishmentPoints = (countWorkAtWeekend - currentContract.getMaxWorkingWeekendsInFourWeeks()) * currentContract.getMaxWorkingWeekendsInFourWeeks_weight();
             }
         }
         return punishmentPoints;
