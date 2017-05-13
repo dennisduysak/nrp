@@ -79,21 +79,13 @@ public class Constraint {
         punishmentPoints += checkMinConsecutiveWorkingDays();
         punishmentPoints += checkMaxConsecutiveFreeDays();
         punishmentPoints += checkMinConsecutiveFreeDays();
-        punishmentPoints += checkMaxInFourWeeks();
-        //punishmentPoints += checkMaxConsecutiveWorkingWeekends();
-        //punishmentPoints += checkMinConsecutiveWorkingWeekends();
-
-        //completeWeekends (wenn sie am WE arbeitet dann an allen Tagen am WE, ansonsten strafpunkte für alle tage an den sie nicht arbeitet
-        //identicalShiftTypesDuringWE //nur ein Strafpunkt bei verstoß
-        //noNightShiftBeforeWE
-
-
-
-        //unwandetPattern
-
+        punishmentPoints += checkWeekendConstraints();
+        punishmentPoints += checkCompleteWeekends();
+        //  wenn sie am WE arbeitet dann an allen Tagen am WE, ansonsten strafpunkte für alle tage an den sie nicht arbeitet
+        punishmentPoints += checkIdenticalShiftTypesDuringWeekend();
+        punishmentPoints += checkNoNightShiftBeforeFreeWeekend();
         punishmentPoints += checkDayOffRequest();
         punishmentPoints += checkShiftOffRequest();
-
         return punishmentPoints;
     }
 
@@ -173,7 +165,8 @@ public class Constraint {
                         }
                     }
                     //wenn Anfang einer konsekutiven Reihe von Arbeitstagen
-                    else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 0 && workOnDayPeriode.get(i + 1).get(j) == 1) {
+                    else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 0 &&
+                            workOnDayPeriode.get(i + 1).get(j) == 1) {
 
                         //wenn aktueller Tag + MinConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() > i + currentContract.getMinConsecutiveWorkingDays()) {
@@ -288,7 +281,8 @@ public class Constraint {
                         }
                     }
                     //wenn Angang einer Arbeitstagreihe
-                    else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 1 && workOnDayPeriode.get(i + 1).get(j) == 0) {
+                    else if (i + 1 < workOnDayPeriode.size() && workOnDayPeriode.get(i).get(j) == 1 &&
+                            workOnDayPeriode.get(i + 1).get(j) == 0) {
 
                         //wenn aktueller Tag + MinConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() > i + currentContract.getMinConsecutiveFreeDays()) {
@@ -325,12 +319,90 @@ public class Constraint {
     }
 
     /**
-     * Prüft die aufeinanderfolgende Wochenenden gegen die im Vertrag vereinbarte maximalgröße.
-     * Bei überschreitung der maximalgröße => Strafpunkt
+     * Prüft die aufeinanderfolgenden Arbeits-Wochenenden und zählt:
+     * 1. um wie viel die Maximalanzahl überschritten wurde
+     * 2. um wie viel die Minimalanzahl unterschritten wurde
+     * <p>
+     * 3. Prüft die Wochenenden in einer Persiode und zält um wie viel die Maximalanzahl überschritten wurde
      *
-     * @return Strafpunkt
+     * @return Strafpunkte - je überschrittene Einheit
      */
-    private int checkMaxInFourWeeks() { // MaxConsecutive oder MaxInFourWeeks??
+    private int checkWeekendConstraints() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints_maxCon = 0;
+        int punishmentPoints_minCon = 0;
+        int punishmentPoints_maxWorkingWe = 0;
+        //für alle employee
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int contractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(contractId);
+            List<Day> weekendDefinition = currentContract.getWeekendDefinition();
+            int countConsecutiveWorkAtWeekend = 0;
+            int countWorkAtWeekend = 0;
+            //für alle Tage
+            boolean oldValue = false;
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                Day currentDay = helper.getWeekDayOfPeriode(i);
+                if (weekendDefinition.contains(currentDay)) {
+                    int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
+                    boolean workAtWeekend = false;
+                    if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
+                        for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                            if (workOnDayPeriode.get(i + k).get(j) == 1) {
+                                workAtWeekend = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                            if (workOnDayPeriode.get(i + k).get(j) == 1) {
+                                workAtWeekend = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (oldValue && workAtWeekend) {
+                        countConsecutiveWorkAtWeekend++;
+                    }
+                    if (workAtWeekend) {
+                        countWorkAtWeekend++;
+                        i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
+                    }
+                    oldValue = workAtWeekend;
+                }
+
+            }
+            int maxConsecutiveWorkingWeekends = currentContract.getMaxConsecutiveWorkingWeekends();
+            if (currentContract.getMaxConsecutiveWorkingWeekends_on() == 1 &&
+                    countConsecutiveWorkAtWeekend > maxConsecutiveWorkingWeekends) {
+                punishmentPoints_maxCon = (countConsecutiveWorkAtWeekend - maxConsecutiveWorkingWeekends) *
+                        currentContract.getMaxConsecutiveWorkingWeekends_weight();
+            }
+            int minConsecutiveWorkingWeekends = currentContract.getMinConsecutiveWorkingWeekends();
+            if (currentContract.getMinConsecutiveWorkingWeekends_on() == 1 &&
+                    countConsecutiveWorkAtWeekend < minConsecutiveWorkingWeekends) {
+                punishmentPoints_minCon = (minConsecutiveWorkingWeekends - countConsecutiveWorkAtWeekend) *
+                        currentContract.getMaxConsecutiveWorkingWeekends_weight();
+            }
+            int maxWorkingWeekendsInFourWeeks = currentContract.getMaxWorkingWeekendsInFourWeeks();
+            if (currentContract.getMaxWorkingWeekendsInFourWeeks_on() == 1 &&
+                    countWorkAtWeekend > maxWorkingWeekendsInFourWeeks) {
+                punishmentPoints_maxWorkingWe = (countWorkAtWeekend - maxWorkingWeekendsInFourWeeks) *
+                        currentContract.getMaxWorkingWeekendsInFourWeeks_weight();
+            }
+        }
+        return punishmentPoints_maxCon + punishmentPoints_minCon + punishmentPoints_maxWorkingWe;
+    }
+
+    /**
+     * !!Achtung: diese Methode ist noch nicht fertig. Ist größtenteils erst nur copy paste
+     * Prüft nach, wenn am Wochenende gearbetet wird, dann gleich das ganze Wochenende
+     *
+     * @return Strafpunkte
+     */
+    private int checkCompleteWeekends() {
         List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
@@ -340,43 +412,110 @@ public class Constraint {
             int contractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(contractId);
             List<Day> weekendDefinition = currentContract.getWeekendDefinition();
-            int countWorkAtWeekend = 0;
             //für alle Tage
             for (int i = 0; i < workOnDayPeriode.size(); i++) {
                 if (currentContract.getMaxWorkingWeekendsInFourWeeks_on() == 1) {
                     Day currentDay = helper.getWeekDayOfPeriode(i);
-
                     if (weekendDefinition.contains(currentDay)) {
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
-                        boolean workAtWeekend = false;
-
-                        //workAtWeekend anschauen; nach jeder iteration true oder false abfragen, bei true true (2 wochenenden am stück)
-
-
+                        int workAtWeekend = 0;
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
                             for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
-                                    workAtWeekend = true;
+                                    workAtWeekend++;
+                                }
+                            }
+                        } else {
+                            for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                                if (workOnDayPeriode.get(i + k).get(j) == 1) {
+                                    workAtWeekend++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft für jeden Employee ob die Nachtschicht vor dem Beginn eines Wochenendes gearbeitet wird.
+     * Wenn ja erfolgt ein Strafpunkt.
+     *
+     * @return Strafpunkte
+     */
+    private int checkNoNightShiftBeforeFreeWeekend() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        List<String> shiftWithIndices = helper.getShiftWithIndices();
+        int punishmentPoints = 0;
+        //für alle employee
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int contractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(contractId);
+            List<Day> weekendDefinition = currentContract.getWeekendDefinition();
+            //für alle Tage
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                if (currentContract.isNoNightShiftBeforeFreeWeekend()) {
+                    Day currentDay = helper.getWeekDayOfPeriode(i);
+                    int nightShiftIndex = shiftWithIndices.indexOf("N");
+                    if (weekendDefinition.get(0) == currentDay &&
+                            workOnDayPeriode.get(i).get(j) == 1 &&
+                            i != 0 &&
+                            roster.get(i - 1)[nightShiftIndex][j] == 1) {
+                        punishmentPoints++;
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
+    }
+
+    /**
+     * Prüft nach, dass an einem Wochenende die gleiche Schicht gearbeitet wird.
+     *
+     * @return Strafpunkte
+     */
+    private int checkIdenticalShiftTypesDuringWeekend() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        int punishmentPoints = 0;
+        //für alle employee
+        for (int j = 0; j < workOnDayPeriode.get(0).size(); j++) {
+            int contractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(contractId);
+            List<Day> weekendDefinition = currentContract.getWeekendDefinition();
+            //für alle Tage
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                if (currentContract.isIdenticalShiftTypesDuringWeekend()) {
+                    Day currentDay = helper.getWeekDayOfPeriode(i);
+                    if (weekendDefinition.contains(currentDay)) {
+                        String currentShift = helper.getShiftOfDay(roster, i, j);
+                        int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
+                        if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
+                            for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                                if (!currentShift.equals(helper.getShiftOfDay(roster, k, j))) {
+                                    punishmentPoints++;
+                                    i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
                                     break;
                                 }
                             }
                         } else {
                             for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
-                                    workAtWeekend = true;
-                                    break;
+                                    if (!currentShift.equals(helper.getShiftOfDay(roster, k, j))) {
+                                        punishmentPoints++;
+                                        i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
+                                        break;
+                                    }
                                 }
                             }
                         }
-                        if (workAtWeekend) {
-                            countWorkAtWeekend++;
-                            i += weekendDefinition.size() - 1;
-                        }
                     }
                 }
-            }
-            if (countWorkAtWeekend > currentContract.getMaxWorkingWeekendsInFourWeeks()) {
-                punishmentPoints = (countWorkAtWeekend - currentContract.getMaxWorkingWeekendsInFourWeeks()) * currentContract.getMaxWorkingWeekendsInFourWeeks_weight();
             }
         }
         return punishmentPoints;
@@ -425,7 +564,8 @@ public class Constraint {
      * Gibt an ob ein employee x am Tag y arbeitet.
      *
      * @param employeeId EmployeeID
-     * @param dayNumber  Der Tag nach beginn der Periode (Also wenn die Woche am Montag beginnt, wäre der erste Mittwoch eine 3)
+     * @param dayNumber  Der Tag nach beginn der Periode (Also wenn die Woche am Montag beginnt,
+     *                   wäre der erste Mittwoch eine 3)
      * @return 1, wenn employee an dem Tag arbeitet (egal welche Schicht), 0 sonst
      * @throws Exception
      */

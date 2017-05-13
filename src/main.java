@@ -19,9 +19,11 @@ public class main {
 
         SimulatedAnnealing sa = new SimulatedAnnealing(initial, schedulingPeriod);
         double startingTemperature = 1000;
-        double coolingRate = 0.5;
+        double coolingRate = 3;
         Solution betterSolution = sa.doSimulatedAnnealing(startingTemperature, coolingRate);
 
+
+        System.out.println("\n------------------------------------\n");
         System.out.println("Strafpunkte der Initiallösung: " + initial.getScore());
         System.out.println("Strafpunkte der Verbesserung: " + betterSolution.getScore());
     }

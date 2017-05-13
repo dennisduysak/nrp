@@ -32,11 +32,11 @@ public class SimulatedAnnealing {
         for (int i = 0; i < numberOfIterations; i++) {
             int score = initialSolution.getScore();
             Solution newSolution = mutatedSolution(initialSolution.getRoster());
-            //System.out.println(i + ".Iteration - Score: " + newSolution.getScore());
+            System.out.println(i + 1 + ".Iteration - Score: " + newSolution.getScore());
             double newScore = newSolution.getScore();
             if (newScore > score) {
                 double scoreDiff = score - newScore;
-                double temperature = startingTemperature - i;
+                double temperature = startingTemperature - (i * coolingRate);
                 double e = Math.exp(scoreDiff / temperature);
                 if (e > Math.random()) {
                     initialSolution = newSolution;
