@@ -462,9 +462,10 @@ public class Constraint {
                     Day currentDay = helper.getWeekDayOfPeriode(i);
                     int nightShiftIndex = shiftWithIndices.indexOf("N");
                     if (weekendDefinition.get(0) == currentDay &&
-                            workOnDayPeriode.get(i).get(j) == 1 &&
+                            workOnDayPeriode.get(i).get(j) == 0 &&
                             i != 0 &&
                             roster.get(i - 1)[nightShiftIndex][j] == 1) {
+                        // hier nur Bestrafung, wenn Freitag/Samstag frei?? Was ist, wenn Sonntag gearbeitet wird?
                         punishmentPoints++;
                     }
                 }
@@ -496,23 +497,22 @@ public class Constraint {
                         String currentShift = helper.getShiftOfDay(roster, i, j);
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
-                                if (!currentShift.equals(helper.getShiftOfDay(roster, k, j))) {
+                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
+                                if (!currentShift.equals(helper.getShiftOfDay(roster,k+i, j))) {
                                     punishmentPoints++;
-                                    i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
-                                    break;
                                 }
                             }
+                            i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
                         } else {
-                            for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                            // Wenn nicht mehr in Periode
+                            for (int k = 0; k < workOnDayPeriode.size() - i; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
-                                    if (!currentShift.equals(helper.getShiftOfDay(roster, k, j))) {
+                                    if (!currentShift.equals(helper.getShiftOfDay(roster, k+i, j))) {
                                         punishmentPoints++;
-                                        i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
-                                        break;
-                                    }
+                                        }
                                 }
                             }
+                            i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
                         }
                     }
                 }
