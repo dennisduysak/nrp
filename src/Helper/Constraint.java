@@ -349,14 +349,14 @@ public class Constraint {
                     int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                     boolean workAtWeekend = false;
                     if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                        for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                        for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
                             if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                 workAtWeekend = true;
                                 break;
                             }
                         }
                     } else {
-                        for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                        for (int k = 0; k < workOnDayPeriode.size() - i; k++) {
                             if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                 workAtWeekend = true;
                                 break;
@@ -377,19 +377,19 @@ public class Constraint {
             int maxConsecutiveWorkingWeekends = currentContract.getMaxConsecutiveWorkingWeekends();
             if (currentContract.getMaxConsecutiveWorkingWeekends_on() == 1 &&
                     countConsecutiveWorkAtWeekend > maxConsecutiveWorkingWeekends) {
-                punishmentPoints_maxCon = (countConsecutiveWorkAtWeekend - maxConsecutiveWorkingWeekends) *
+                punishmentPoints_maxCon += (countConsecutiveWorkAtWeekend - maxConsecutiveWorkingWeekends) *
                         currentContract.getMaxConsecutiveWorkingWeekends_weight();
             }
             int minConsecutiveWorkingWeekends = currentContract.getMinConsecutiveWorkingWeekends();
             if (currentContract.getMinConsecutiveWorkingWeekends_on() == 1 &&
                     countConsecutiveWorkAtWeekend < minConsecutiveWorkingWeekends) {
-                punishmentPoints_minCon = (minConsecutiveWorkingWeekends - countConsecutiveWorkAtWeekend) *
+                punishmentPoints_minCon += (minConsecutiveWorkingWeekends - countConsecutiveWorkAtWeekend) *
                         currentContract.getMaxConsecutiveWorkingWeekends_weight();
             }
             int maxWorkingWeekendsInFourWeeks = currentContract.getMaxWorkingWeekendsInFourWeeks();
             if (currentContract.getMaxWorkingWeekendsInFourWeeks_on() == 1 &&
                     countWorkAtWeekend > maxWorkingWeekendsInFourWeeks) {
-                punishmentPoints_maxWorkingWe = (countWorkAtWeekend - maxWorkingWeekendsInFourWeeks) *
+                punishmentPoints_maxWorkingWe += (countWorkAtWeekend - maxWorkingWeekendsInFourWeeks) *
                         currentContract.getMaxWorkingWeekendsInFourWeeks_weight();
             }
         }
@@ -476,7 +476,8 @@ public class Constraint {
 
     /**
      * Prüft nach, dass an einem Wochenende die gleiche Schicht gearbeitet wird.
-     *
+     * Annahme: Der erste Tag des definierten Wochenendes legt den Schichttyp fest, auf welchen die nächsten Tage überprüft werden.
+     *          Nicht an diesem Tag zu arbeiten, ist auch eine Art Schicht.
      * @return Strafpunkte
      */
     private int checkIdenticalShiftTypesDuringWeekend() {
@@ -522,7 +523,7 @@ public class Constraint {
     }
 
     /**
-     * Prüft und zählt die Schichten, an dem sich die employees frei gewünscht haben, sie aber trotzdem arbeiten Müssen
+     * Prüft und zählt die Schichten, an dem sich die Employees frei gewünscht haben, sie aber trotzdem arbeiten müssen
      *
      * @return Strafpunkte
      */
