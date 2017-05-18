@@ -245,4 +245,26 @@ public class Helper {
         c.add(Calendar.DATE, day);
         return getWeekDay(c.get(Calendar.DAY_OF_WEEK));
     }
+
+    /**
+     * Gibt die Schicht zurück an dem der Employee für den Tag x arbeitet
+     *
+     * @param roster   Dienstplan
+     * @param day      Tag
+     * @param employee Employee
+     * @return Schicht als String
+     */
+    public String getShiftOfDay(List<int[][]> roster, int day, int employee) {
+        int[][] currentDay = roster.get(day);
+        int shiftId = 99;
+        for (int i = 0; i < currentDay.length; i++) {
+            if (currentDay[i][employee] == 1) {
+                shiftId = i;
+            }
+        }
+        if (shiftId == 99) {
+            return "none";
+        }
+        return getShiftWithIndices().get(shiftId);
+    }
 }
