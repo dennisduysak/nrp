@@ -13,8 +13,8 @@ public class Constraint {
 
     public Constraint(SchedulingPeriod schedulingPeriod, List<int[][]> roster) {
         this.schedulingPeriod = schedulingPeriod;
-        helper = new Helper(this.schedulingPeriod);
         this.roster = roster;
+        helper = new Helper(this.schedulingPeriod, this.roster);
     }
 
     /**
@@ -81,11 +81,13 @@ public class Constraint {
         punishmentPoints += checkMinConsecutiveFreeDays();
         punishmentPoints += checkWeekendConstraints();
         punishmentPoints += checkCompleteWeekends();
-        //  wenn sie am WE arbeitet dann an allen Tagen am WE, ansonsten strafpunkte für alle tage an den sie nicht arbeitet
         punishmentPoints += checkIdenticalShiftTypesDuringWeekend();
         punishmentPoints += checkNoNightShiftBeforeFreeWeekend();
         punishmentPoints += checkDayOffRequest();
         punishmentPoints += checkShiftOffRequest();
+
+        punishmentPoints += checkUnwantedPattern();
+
         return punishmentPoints;
     }
 
@@ -96,7 +98,7 @@ public class Constraint {
      * @return Strafpunkt
      */
     private int checkMaxConsecutiveWorkingDays() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
@@ -135,7 +137,7 @@ public class Constraint {
      * @return Strafpunkt
      */
     private int checkMinConsecutiveWorkingDays() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
@@ -211,7 +213,7 @@ public class Constraint {
      * @return Strafpunkt
      */
     private int checkMaxConsecutiveFreeDays() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
@@ -250,7 +252,7 @@ public class Constraint {
      * @return Strafpunkt
      */
     private int checkMinConsecutiveFreeDays() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
@@ -328,7 +330,7 @@ public class Constraint {
      * @return Strafpunkte - je überschrittene Einheit
      */
     private int checkWeekendConstraints() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints_maxCon = 0;
@@ -349,7 +351,7 @@ public class Constraint {
                     int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                     boolean workAtWeekend = false;
                     if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                        for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
+                        for (int k = 0; k < weekendDefinition.size() - indexOfWeekendDefinition; k++) {
                             if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                 workAtWeekend = true;
                                 break;
@@ -403,7 +405,7 @@ public class Constraint {
      * @return Strafpunkte
      */
     private int checkCompleteWeekends() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
@@ -446,7 +448,7 @@ public class Constraint {
      * @return Strafpunkte
      */
     private int checkNoNightShiftBeforeFreeWeekend() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         List<String> shiftWithIndices = helper.getShiftWithIndices();
@@ -476,12 +478,14 @@ public class Constraint {
 
     /**
      * Prüft nach, dass an einem Wochenende die gleiche Schicht gearbeitet wird.
-     * Annahme: Der erste Tag des definierten Wochenendes legt den Schichttyp fest, auf welchen die nächsten Tage überprüft werden.
-     *          Nicht an diesem Tag zu arbeiten, ist auch eine Art Schicht.
+     * Annahme: Der erste Tag des definierten Wochenendes legt den Schichttyp fest, auf welchen die nächsten Tage
+     * überprüft werden.
+     * Nicht an diesem Tag zu arbeiten, ist auch eine Art Schicht.
+     *
      * @return Strafpunkte
      */
     private int checkIdenticalShiftTypesDuringWeekend() {
-        List<List<Integer>> workOnDayPeriode = helper.getWorkingList(roster);
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
         List<Employee> employeeList = helper.getEmployeeList();
         List<Contract> contractList = helper.getContractList();
         int punishmentPoints = 0;
@@ -495,11 +499,11 @@ public class Constraint {
                 if (currentContract.isIdenticalShiftTypesDuringWeekend()) {
                     Day currentDay = helper.getWeekDayOfPeriode(i);
                     if (weekendDefinition.contains(currentDay)) {
-                        String currentShift = helper.getShiftOfDay(roster, i, j);
+                        String currentShift = helper.getShiftOfDay(i, j);
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
-                                if (!currentShift.equals(helper.getShiftOfDay(roster,k+i, j))) {
+                            for (int k = 0; k < weekendDefinition.size() - indexOfWeekendDefinition; k++) {
+                                if (!currentShift.equals(helper.getShiftOfDay(k + i, j))) {
                                     punishmentPoints++;
                                 }
                             }
@@ -508,9 +512,9 @@ public class Constraint {
                             // Wenn nicht mehr in Periode
                             for (int k = 0; k < workOnDayPeriode.size() - i; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
-                                    if (!currentShift.equals(helper.getShiftOfDay(roster, k+i, j))) {
+                                    if (!currentShift.equals(helper.getShiftOfDay(k + i, j))) {
                                         punishmentPoints++;
-                                        }
+                                    }
                                 }
                             }
                             i += weekendDefinition.size() - indexOfWeekendDefinition - 1;
@@ -626,5 +630,51 @@ public class Constraint {
         }
         //summierte Liste
         return numbOfDiffDays.stream().mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * Prüft die unwantedPatterns
+     *
+     * @return Strafpunkte
+     */
+    private int checkUnwantedPattern() {
+        List<List<Integer>> workOnDayPeriode = helper.getWorkingList();
+        List<Employee> employeeList = helper.getEmployeeList();
+        List<Contract> contractList = helper.getContractList();
+        List<Pattern> patternList = helper.getPatternList();
+        int punishmentPoints = 0;
+        //für alle employee
+        for (int j = 0; j < employeeList.size(); j++) {
+            int employeeContractId = employeeList.get(j).getContractId();
+            Contract currentContract = contractList.get(employeeContractId);
+            List<Integer> unwantedPatterns = currentContract.getUnwantedPatterns();
+
+            //für alle Tage
+            for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                String shift = helper.getShiftOfDay(i, j);
+                Day day = helper.getWeekDayOfPeriode(i);
+                for (int k : unwantedPatterns) {
+                    Pattern pattern = patternList.get(k);
+                    List<PatternEntry> patternEntry = pattern.getPatternEntryList();
+                    PatternEntry trigger = patternEntry.get(0);
+                    if (trigger.getShiftType().equals(shift) &&
+                            (trigger.getDay() == Day.Any || trigger.getDay() == day)) {
+                        for (int l = 1; l < patternEntry.size(); l++) {
+                            if (!(i + unwantedPatterns.size() - 1 >= workOnDayPeriode.size())) {
+                                PatternEntry currentEntry = patternEntry.get(l);
+                                String shift2 = helper.getShiftOfDay(i + l, j);
+                                Day day2 = helper.getWeekDayOfPeriode(i + l);
+                                if (!((currentEntry.getShiftType().equals("Any") || currentEntry.getShiftType().equals(shift2)) &&
+                                        (currentEntry.getDay() == Day.Any || currentEntry.getDay() == day2))) {
+                                    punishmentPoints++;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return punishmentPoints;
     }
 }

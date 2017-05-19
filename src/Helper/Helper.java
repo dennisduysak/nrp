@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 
 public class Helper {
     private SchedulingPeriod schedulingPeriod;
+    private List<int[][]> roster;
 
-    public Helper(SchedulingPeriod schedulingPeriod) {
+    public Helper(SchedulingPeriod schedulingPeriod, List<int[][]> roster) {
         this.schedulingPeriod = schedulingPeriod;
+        this.roster = roster;
     }
 
     /**
@@ -46,6 +48,17 @@ public class Helper {
     public List<Contract> getContractList() {
         return schedulingPeriod.getContracts().stream()
                 .map(object -> (Contract) object)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gibt aus schedulingPeriod die UnwandetPatterns-Liste wieder
+     *
+     * @return Liste der Mitarbeiten
+     */
+    public List<Pattern> getPatternList() {
+        return schedulingPeriod.getPatterns().stream()
+                .map(object -> (Pattern) object)
                 .collect(Collectors.toList());
     }
 
@@ -217,7 +230,7 @@ public class Helper {
         return calcDays(schedulingPeriod.getStartDate(), date);
     }
 
-    public List<List<Integer>> getWorkingList(List<int[][]> roster) {
+    public List<List<Integer>> getWorkingList() {
         List<List<Integer>> workOnDayPeriode = new ArrayList<>();
         for (int i = 0; i < roster.size(); i++) {
             List<Integer> workOnDayList = new ArrayList<>();
@@ -249,12 +262,11 @@ public class Helper {
     /**
      * Gibt die Schicht zurück an dem der Employee für den Tag x arbeitet
      *
-     * @param roster   Dienstplan
      * @param day      Tag
      * @param employee Employee
      * @return Schicht als String
      */
-    public String getShiftOfDay(List<int[][]> roster, int day, int employee) {
+    public String getShiftOfDay(int day, int employee) {
         int[][] currentDay = roster.get(day);
         int shiftId = 99;
         for (int i = 0; i < currentDay.length; i++) {
@@ -263,7 +275,7 @@ public class Helper {
             }
         }
         if (shiftId == 99) {
-            return "none";
+            return "None";
         }
         return getShiftWithIndices().get(shiftId);
     }

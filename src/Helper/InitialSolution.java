@@ -11,7 +11,7 @@ public class InitialSolution {
     private Helper helper;
 
     public InitialSolution(SchedulingPeriod schedulingPeriod) {
-        helper = new Helper(schedulingPeriod);
+        helper = new Helper(schedulingPeriod, null);
     }
 
     /**
