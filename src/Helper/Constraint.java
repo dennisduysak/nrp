@@ -654,6 +654,7 @@ public class Constraint {
                 String shift = helper.getShiftOfDay(i, j);
                 Day day = helper.getWeekDayOfPeriode(i);
                 for (int k : unwantedPatterns) {
+                    boolean pattern_ok = false;
                     Pattern pattern = patternList.get(k);
                     List<PatternEntry> patternEntry = pattern.getPatternEntryList();
                     PatternEntry trigger = patternEntry.get(0);
@@ -664,12 +665,18 @@ public class Constraint {
                                 PatternEntry currentEntry = patternEntry.get(l);
                                 String shift2 = helper.getShiftOfDay(i + l, j);
                                 Day day2 = helper.getWeekDayOfPeriode(i + l);
-                                if (!((currentEntry.getShiftType().equals("Any") || currentEntry.getShiftType().equals(shift2)) &&
+                                if (((currentEntry.getShiftType().equals("Any") || currentEntry.getShiftType().equals(shift2)) &&
                                         (currentEntry.getDay() == Day.Any || currentEntry.getDay() == day2))) {
-                                    punishmentPoints++;
+                                    pattern_ok = true;
+                                }
+                                else{
+                                    pattern_ok = false;
                                     break;
                                 }
                             }
+                        }
+                        if(pattern_ok){
+                            punishmentPoints++; // * gewichtung
                         }
                     }
                 }
