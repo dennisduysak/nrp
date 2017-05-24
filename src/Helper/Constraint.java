@@ -419,7 +419,7 @@ public class Constraint {
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         int workAtWeekend = 0;
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
+                            for (int k = 0; k < weekendDefinition.size() - indexOfWeekendDefinition; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                     workAtWeekend++;
                                 }
@@ -430,25 +430,24 @@ public class Constraint {
                                     workAtWeekend++;
                                 }
                             }
-                            if(workOnDayPeriode.size() - i - 1 == 0 &&workAtWeekend!=0){
-                                if(weekendDefinition.size()==3){
-                                    workAtWeekend+=2;
-                                }
-                                else{
-                                    workAtWeekend+=1;
+                            if (workOnDayPeriode.size() - i - 1 == 0 && workAtWeekend != 0) {
+                                if (weekendDefinition.size() == 3) {
+                                    workAtWeekend += 2;
+                                } else {
+                                    workAtWeekend += 1;
                                 }
                             }
-                            if(workOnDayPeriode.size() -i -1 == 1 &&workAtWeekend!=0) {
+                            if (workOnDayPeriode.size() - i - 1 == 1 && workAtWeekend != 0) {
                                 if (weekendDefinition.size() == 3) {
                                     workAtWeekend += 1;
                                 }
                             }
                         }
-                        if (workAtWeekend != 0 && workAtWeekend != weekendDefinition.size()-indexOfWeekendDefinition) {
+                        if (workAtWeekend != 0 && workAtWeekend != weekendDefinition.size() - indexOfWeekendDefinition) {
                             punishmentPoints++;
                         }
                         i += weekendDefinition.size();
-                        if (i >= workOnDayPeriode.size()){
+                        if (i >= workOnDayPeriode.size()) {
                             break;
                         }
                     }
@@ -519,8 +518,8 @@ public class Constraint {
                         String currentShift = helper.getShiftOfDay(i, j);
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
-                                if (!currentShift.equals(helper.getShiftOfDay(k+i, j))) {
+                            for (int k = 0; k < weekendDefinition.size() - indexOfWeekendDefinition; k++) {
+                                if (!currentShift.equals(helper.getShiftOfDay(k + i, j))) {
                                     punishmentPoints++;
                                 }
                             }
@@ -684,14 +683,13 @@ public class Constraint {
                                 if (((currentEntry.getShiftType().equals("Any") || currentEntry.getShiftType().equals(shift2)) &&
                                         (currentEntry.getDay() == Day.Any || currentEntry.getDay() == day2))) {
                                     pattern_ok = true;
-                                }
-                                else{
+                                } else {
                                     pattern_ok = false;
                                     break;
                                 }
                             }
                         }
-                        if(pattern_ok){
+                        if (pattern_ok) {
                             punishmentPoints++; // * gewichtung
                         }
                     }
