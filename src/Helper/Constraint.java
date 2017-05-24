@@ -417,19 +417,32 @@ public class Constraint {
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         int workAtWeekend = 0;
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                     workAtWeekend++;
                                 }
                             }
                         } else {
-                            for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                            for (int k = 0; k < workOnDayPeriode.size() - i; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                     workAtWeekend++;
                                 }
                             }
+                            if(workOnDayPeriode.size() - i - 1 == 0 &&workAtWeekend!=0){
+                                if(weekendDefinition.size()==3){
+                                    workAtWeekend+=2;
+                                }
+                                else{
+                                    workAtWeekend+=1;
+                                }
+                            }
+                            if(workOnDayPeriode.size() -i -1 == 1 &&workAtWeekend!=0) {
+                                if (weekendDefinition.size() == 3) {
+                                    workAtWeekend += 1;
+                                }
+                            }
                         }
-                        if (workAtWeekend != weekendDefinition.size()) {
+                        if (workAtWeekend != 0 && workAtWeekend != weekendDefinition.size()-indexOfWeekendDefinition) {
                             punishmentPoints++;
                         }
                         i += weekendDefinition.size();
