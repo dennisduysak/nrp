@@ -147,10 +147,9 @@ public class Constraint {
             Contract currentContract = contractList.get(employeeContractId);
             int minConsecutiveWorkingDays = currentContract.getMinConsecutiveWorkingDays();
             //für alle Tage
-            for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                int counter = 0;
-
-                if (currentContract.getMinConsecutiveWorkingDays_on() == 1) {
+            if (currentContract.getMinConsecutiveWorkingDays_on() == 1) {
+                for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                    int counter = 0;
                     //Sonderfall: erster Tag in Periode
                     if (i == 0 && workOnDayPeriode.get(i).get(j) == 1) {
 
@@ -222,11 +221,11 @@ public class Constraint {
             int employeeContractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(employeeContractId);
             int maxConsecutiveFreeDays = currentContract.getMaxConsecutiveFreeDays();
-            //für alle Tage
-            for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                //Wenn KEIN Arbeitstag
-                if (workOnDayPeriode.get(i).get(j) == 0) {
-                    if (currentContract.getMaxConsecutiveFreeDays_on() == 1) {
+            if (currentContract.getMaxConsecutiveFreeDays_on() == 1) {
+                //für alle Tage
+                for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                    //Wenn KEIN Arbeitstag
+                    if (workOnDayPeriode.get(i).get(j) == 0) {
                         int counter = 0;
                         //wenn aktueller Tag + MaxConDays noch innerhalb der Periode liegt
                         if (workOnDayPeriode.size() > i + currentContract.getMaxConsecutiveFreeDays()) {
@@ -261,11 +260,10 @@ public class Constraint {
             int employeeContractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(employeeContractId);
             int minConsecutiveFreeDays = currentContract.getMinConsecutiveFreeDays();
-            //für alle Tage
-            for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                int counter = 0;
-
-                if (currentContract.getMinConsecutiveFreeDays_on() == 1) {
+            if (currentContract.getMinConsecutiveFreeDays_on() == 1) {
+                //für alle Tage
+                for (int i = 0; i < workOnDayPeriode.size(); i++) {
+                    int counter = 0;
                     //Sonderfall: erster Tag in Periode
                     if (i == 0 && workOnDayPeriode.get(i).get(j) == 0) {
 
@@ -399,7 +397,6 @@ public class Constraint {
     }
 
     /**
-     * !!Achtung: diese Methode ist noch nicht fertig. Ist größtenteils erst nur copy paste
      * Prüft nach, wenn am Wochenende gearbetet wird, dann gleich das ganze Wochenende
      *
      * @return Strafpunkte
@@ -414,25 +411,45 @@ public class Constraint {
             int contractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(contractId);
             List<Day> weekendDefinition = currentContract.getWeekendDefinition();
-            //für alle Tage
-            for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                if (currentContract.getMaxWorkingWeekendsInFourWeeks_on() == 1) {
+            if (currentContract.isCompleteWeekends()) {
+                //für alle Tage
+                for (int i = 0; i < workOnDayPeriode.size(); i++) {
                     Day currentDay = helper.getWeekDayOfPeriode(i);
                     if (weekendDefinition.contains(currentDay)) {
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         int workAtWeekend = 0;
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = indexOfWeekendDefinition; k < weekendDefinition.size(); k++) {
+                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                     workAtWeekend++;
                                 }
                             }
                         } else {
-                            for (int k = indexOfWeekendDefinition; k < workOnDayPeriode.size() - i; k++) {
+                            for (int k = 0; k < workOnDayPeriode.size() - i; k++) {
                                 if (workOnDayPeriode.get(i + k).get(j) == 1) {
                                     workAtWeekend++;
                                 }
                             }
+                            if(workOnDayPeriode.size() - i - 1 == 0 &&workAtWeekend!=0){
+                                if(weekendDefinition.size()==3){
+                                    workAtWeekend+=2;
+                                }
+                                else{
+                                    workAtWeekend+=1;
+                                }
+                            }
+                            if(workOnDayPeriode.size() -i -1 == 1 &&workAtWeekend!=0) {
+                                if (weekendDefinition.size() == 3) {
+                                    workAtWeekend += 1;
+                                }
+                            }
+                        }
+                        if (workAtWeekend != 0 && workAtWeekend != weekendDefinition.size()-indexOfWeekendDefinition) {
+                            punishmentPoints++;
+                        }
+                        i += weekendDefinition.size();
+                        if (i >= workOnDayPeriode.size()){
+                            break;
                         }
                     }
                 }
@@ -458,9 +475,9 @@ public class Constraint {
             int contractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(contractId);
             List<Day> weekendDefinition = currentContract.getWeekendDefinition();
-            //für alle Tage
-            for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                if (currentContract.isNoNightShiftBeforeFreeWeekend()) {
+            if (currentContract.isNoNightShiftBeforeFreeWeekend()) {
+                //für alle Tage
+                for (int i = 0; i < workOnDayPeriode.size(); i++) {
                     Day currentDay = helper.getWeekDayOfPeriode(i);
                     int nightShiftIndex = shiftWithIndices.indexOf("N");
                     if (weekendDefinition.get(0) == currentDay &&
@@ -494,16 +511,16 @@ public class Constraint {
             int contractId = employeeList.get(j).getContractId();
             Contract currentContract = contractList.get(contractId);
             List<Day> weekendDefinition = currentContract.getWeekendDefinition();
-            //für alle Tage
-            for (int i = 0; i < workOnDayPeriode.size(); i++) {
-                if (currentContract.isIdenticalShiftTypesDuringWeekend()) {
+            if (currentContract.isIdenticalShiftTypesDuringWeekend()) {
+                //für alle Tage
+                for (int i = 0; i < workOnDayPeriode.size(); i++) {
                     Day currentDay = helper.getWeekDayOfPeriode(i);
                     if (weekendDefinition.contains(currentDay)) {
                         String currentShift = helper.getShiftOfDay(i, j);
                         int indexOfWeekendDefinition = weekendDefinition.indexOf(currentDay);
                         if (workOnDayPeriode.size() > i + weekendDefinition.size() - 1) {
-                            for (int k = 0; k < weekendDefinition.size() - indexOfWeekendDefinition; k++) {
-                                if (!currentShift.equals(helper.getShiftOfDay(k + i, j))) {
+                            for (int k = 0; k < weekendDefinition.size()-indexOfWeekendDefinition; k++) {
+                                if (!currentShift.equals(helper.getShiftOfDay(k+i, j))) {
                                     punishmentPoints++;
                                 }
                             }
@@ -611,7 +628,6 @@ public class Constraint {
         for (int i = 0; i < numbOfShiftInPeriod.size(); i++) {
             Employee e = (Employee) schedulingPeriod.getEmployees().get(i);
             Contract c = (Contract) schedulingPeriod.getContracts().get(e.getContractId());
-
             int diffDays = 0;
             int daysOfWork = numbOfShiftInPeriod.get(i);
             int maxDaysOfWork = c.getMaxNumAssignments();
