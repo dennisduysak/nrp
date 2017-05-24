@@ -15,7 +15,7 @@ public class SimulatedAnnealing {
     public SimulatedAnnealing(Solution initialSolution, SchedulingPeriod schedulingPeriod) {
         this.initialSolution = initialSolution;
         this.schedulingPeriod = schedulingPeriod;
-        helper = new Helper(this.schedulingPeriod);
+        helper = new Helper(this.schedulingPeriod,null);
     }
 
     /**
