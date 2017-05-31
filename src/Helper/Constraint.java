@@ -483,7 +483,6 @@ public class Constraint {
                             workOnDayPeriode.get(i).get(j) == 0 &&
                             i != 0 &&
                             roster.get(i - 1)[nightShiftIndex][j] == 1) {
-                        // hier nur Bestrafung, wenn Freitag/Samstag frei?? Was ist, wenn Sonntag gearbeitet wird?
                         punishmentPoints++;
                     }
                 }
