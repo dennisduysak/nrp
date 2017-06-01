@@ -430,6 +430,7 @@ public class Constraint {
                                     workAtWeekend++;
                                 }
                             }
+                            // wenn am letzten Tag gearbeitet wird und es ein Wochenende ist
                             if (workOnDayPeriode.size() - i - 1 == 0 && workAtWeekend != 0) {
                                 if (weekendDefinition.size() == 3) {
                                     workAtWeekend += 2;
@@ -437,13 +438,15 @@ public class Constraint {
                                     workAtWeekend += 1;
                                 }
                             }
+                            //wenn am vorletzten Tag gearbeitet wird und es ein Wochenende ist (nur für Fr,Sa,So)
                             if (workOnDayPeriode.size() - i - 1 == 1 && workAtWeekend != 0) {
                                 if (weekendDefinition.size() == 3) {
                                     workAtWeekend += 1;
                                 }
                             }
                         }
-                        if (workAtWeekend != 0 && workAtWeekend != weekendDefinition.size() - indexOfWeekendDefinition) {
+                        if (workAtWeekend != 0 && workAtWeekend !=
+                                weekendDefinition.size() - indexOfWeekendDefinition) {
                             punishmentPoints++;
                         }
                         i += weekendDefinition.size();
