@@ -486,7 +486,6 @@ public class Constraint {
                             workOnDayPeriode.get(i).get(j) == 0 &&
                             i != 0 &&
                             roster.get(i - 1)[nightShiftIndex][j] == 1) {
-                        // hier nur Bestrafung, wenn Freitag/Samstag frei?? Was ist, wenn Sonntag gearbeitet wird?
                         punishmentPoints++;
                     }
                 }
@@ -683,8 +682,8 @@ public class Constraint {
                                 PatternEntry currentEntry = patternEntry.get(l);
                                 String shift2 = helper.getShiftOfDay(i + l, j);
                                 Day day2 = helper.getWeekDayOfPeriode(i + l);
-                                if (((currentEntry.getShiftType().equals("Any") || currentEntry.getShiftType().equals(shift2)) &&
-                                        (currentEntry.getDay() == Day.Any || currentEntry.getDay() == day2))) {
+                                if (((currentEntry.getShiftType().equals("Any")&& shift2 != "None") || currentEntry.getShiftType().equals(shift2)) &&
+                                        (currentEntry.getDay() == Day.Any || currentEntry.getDay() == day2)) {
                                     pattern_ok = true;
                                 } else {
                                     pattern_ok = false;
@@ -693,7 +692,7 @@ public class Constraint {
                             }
                         }
                         if (pattern_ok) {
-                            punishmentPoints++; // * gewichtung
+                            punishmentPoints++;
                         }
                     }
                 }
