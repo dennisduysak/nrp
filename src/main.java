@@ -54,7 +54,6 @@ public class main {
 
                 coolingRate += 5;
             }
-            CSVUtils.writeLine(writer, Arrays.asList());
 
             //Veränderung der StartTemperatur bei 10 Iterationen
             startTemp = 1000;
