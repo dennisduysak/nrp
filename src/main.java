@@ -8,17 +8,18 @@ import java.util.List;
 public class main {
     public static void main(String argv[]) throws Exception {
         //CSV-Erstellung
-        String csvFile = "/Users/dennis/IdeaProjects/nrp/out/output.csv";
+        String csvFile = "./out/output.csv";
         FileWriter writer = new FileWriter(csvFile);
         CSVUtils.writeLine(writer, Arrays.asList("Dateiname",
                 "StartTemperatur",
                 "CoolingRate",
-                "AnzahlDerIterationen",
-                "AverageScore"));
+                "IterationsAnzahl",
+                "Score"));
 
         //Problem
-        String[] fileNames = {"long01",
-          /*      "long_hidden01",
+        String[] fileNames = {"toy1",
+                "long01",
+                "long_hidden01",
                 "long_hint01",
                 "long_late01",
                 "medium01",
@@ -28,44 +29,50 @@ public class main {
                 "sprint01",
                 "sprint_hidden01",
                 "sprint_hint01",
-                "sprint_late01",*/
-                "toy1"};
-        for (String fileName : fileNames) {
-            XMLParser xmlParser = new XMLParser(fileName);
-            SchedulingPeriod schedulingPeriod = xmlParser.parseXML();
+                "sprint_late01"};
 
-            //Initiallösung
-            InitialSolution initialSolution = new InitialSolution(schedulingPeriod);
-            List<int[][]> initialRoster = initialSolution.createSolution();
+        double[] startTemp = {10000, 5000, 1000, 500, 100, 10};
+        double[] coolingRate = {10, 5, 1, 0.5, 0.1, 0.01};
+        double[] coolingRateFrequency = {1, 0.5, 0.1, 0.05, 0.01, 0.001};
+        double[] startTempFrequency = {1000, 500, 100, 50, 10, 1};
+        int iterations = 10;
 
-            //Initiallösung auf Restriktionen prüfen und bewerten
-            Constraint constraint = new Constraint(schedulingPeriod, initialRoster);
-            Solution initial = new Solution(initialRoster, constraint.calcRosterScore());
+        for (int j = 0; j < 1; j++) {
+            for (String fileName : fileNames) {
+                XMLParser xmlParser = new XMLParser(fileName);
+                SchedulingPeriod schedulingPeriod = xmlParser.parseXML();
 
-            //Veränderung der CoolingRate bei 10 Iterationen
-            double startTemp = 1000;
-            double coolingRate = 3;
-            for (int i = 0; i < 10; i++) {
-                int numberOfIterations = (int) (startTemp / coolingRate);
-                double averageScore = getAverageScore(schedulingPeriod, initial, startTemp, coolingRate);
+                //Initiallösung
+                InitialSolution initialSolution = new InitialSolution(schedulingPeriod);
+                List<int[][]> initialRoster = initialSolution.createSolution();
 
-                CSVUtils.writeLine(writer, Arrays.asList(fileName, String.valueOf(startTemp),
-                        String.valueOf(coolingRate), String.valueOf(numberOfIterations), String.valueOf(averageScore)));
+                //Initiallösung auf Restriktionen prüfen und bewerten
+                Constraint constraint = new Constraint(schedulingPeriod, initialRoster);
+                Solution initial = new Solution(initialRoster, constraint.calcRosterScore());
 
-                coolingRate += 5;
-            }
+                //Veränderung der CoolingRate bei 10 Iterationen
+                for (int i = 0; i < iterations; i++) {
+                    int numberOfIterations = (int) (startTemp[j] / coolingRate[j]);
+                    double averageScore = getAverageScore(schedulingPeriod, initial, startTemp[j], coolingRate[j]);
 
-            //Veränderung der StartTemperatur bei 10 Iterationen
-            startTemp = 1000;
-            coolingRate = 3;
-            for (int i = 0; i < 10; i++) {
-                int numberOfIterations = (int) (startTemp / coolingRate);
-                double averageScore = getAverageScore(schedulingPeriod, initial, startTemp, coolingRate);
+                    CSVUtils.writeLine(writer, Arrays.asList(fileName, String.valueOf(startTemp[j]),
+                            String.valueOf(coolingRate[j]), String.valueOf(numberOfIterations), String.valueOf(averageScore)));
 
-                CSVUtils.writeLine(writer, Arrays.asList(fileName, String.valueOf(startTemp),
-                        String.valueOf(coolingRate), String.valueOf(numberOfIterations), String.valueOf(averageScore)));
+                    coolingRate[j] -= coolingRateFrequency[j];
+                }
 
-                startTemp -= 10;
+                //Veränderung der StartTemperatur bei 10 Iterationen
+                startTemp = new double[]{10000, 5000, 1000, 500, 100, 10};
+                coolingRate = new double[]{10, 5, 1, 0.5, 0.1, 0.01};
+                for (int i = 0; i < iterations; i++) {
+                    int numberOfIterations = (int) (startTemp[j] / coolingRate[j]);
+                    double averageScore = getAverageScore(schedulingPeriod, initial, startTemp[j], coolingRate[j]);
+
+                    CSVUtils.writeLine(writer, Arrays.asList(fileName, String.valueOf(startTemp[j]),
+                            String.valueOf(coolingRate[j]), String.valueOf(numberOfIterations), String.valueOf(averageScore)));
+
+                    startTemp[j] -= startTempFrequency[j];
+                }
             }
         }
         writer.flush();
