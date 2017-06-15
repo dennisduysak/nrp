@@ -93,7 +93,8 @@ public class Constraint {
 
     /**
      * Prüft die aufeinanderfolgende Arbeitstage gegen die im Vertrag vereinbarte maximalgröße.
-     * Für jeden Tag extra, wird ein weiterer Strafpunkt verteilt
+     * Annahme: Für jeden einzelnen Tag, wird ein weiterer Strafpunkt verteilt
+     *
      *
      * @return Strafpunkt
      */
@@ -133,6 +134,8 @@ public class Constraint {
     /**
      * Prüft die aufeinanderfolgende Arbeitstage gegen die im Vertrag vereinbarte minimalgröße.
      * Bei unterschreitung der minimalgröße => Strafpunkt je unterschrittenem Tag
+     * Annahme: Für jeden Tag gibt es einen Strafpunkt; Am Ende einer Persiode werden auch für die Tage Strafpunkte
+     * verteilt, auch wenn der Tage in der nächsten Periode unbekannt sind
      *
      * @return Strafpunkt
      */
@@ -208,6 +211,7 @@ public class Constraint {
     /**
      * Prüft die aufeinanderfolgende freie Tage gegen die im Vertrag vereinbarte maximalgröße.
      * Für jeden Tag extra, wird ein weiterer Strafpunkt verteilt
+     * Annahme: siehe MaxConsecutiveWorkingDays
      *
      * @return Strafpunkt
      */
@@ -247,6 +251,7 @@ public class Constraint {
     /**
      * Prüft die aufeinanderfolgende freien Arbeitstage gegen die im Vertrag vereinbarte minimalgröße.
      * Bei unterschreitung der minimalgröße => Strafpunkt
+     * Annahme: siehe MinConsecutiveWorkingDays
      *
      * @return Strafpunkt
      */
@@ -324,6 +329,8 @@ public class Constraint {
      * 2. um wie viel die Minimalanzahl unterschritten wurde
      * <p>
      * 3. Prüft die Wochenenden in einer Persiode und zält um wie viel die Maximalanzahl überschritten wurde
+     * Annahme: Wenn an einem Tag des WE gearbetet wurde, zählt es als Arbeitswochenende;
+     * Für jedes weitereWochenende Wochende gibt es einen weitern Strafpunkt
      *
      * @return Strafpunkte - je überschrittene Einheit
      */
@@ -398,6 +405,7 @@ public class Constraint {
 
     /**
      * Prüft nach, wenn am Wochenende gearbetet wird, dann gleich das ganze Wochenende
+     * Annahme: Angebrochene Wochenenden am Anfang und am Ende der Persiode werden nicht berücksichtigt
      *
      * @return Strafpunkte
      */
@@ -463,6 +471,8 @@ public class Constraint {
     /**
      * Prüft für jeden Employee ob die Nachtschicht vor dem Beginn eines Wochenendes gearbeitet wird.
      * Wenn ja erfolgt ein Strafpunkt.
+     * Annahme: Wenn der erste Tag des Wochenendes laut Wochenendefinition nicht gearbetet wird, darf keine Nachtschicht
+     * am Vortag verteilt werden
      *
      * @return Strafpunkte
      */
@@ -499,6 +509,7 @@ public class Constraint {
      * Annahme: Der erste Tag des definierten Wochenendes legt den Schichttyp fest, auf welchen die nächsten Tage
      * überprüft werden.
      * Nicht an diesem Tag zu arbeiten, ist auch eine Art Schicht.
+     * Annahme: Der erste Tag des Wochenendes definiert wie das Restwochenende auszusehen hat.
      *
      * @return Strafpunkte
      */
@@ -651,6 +662,7 @@ public class Constraint {
 
     /**
      * Prüft die unwantedPatterns
+     * Annahme: Erst wenn das gesamte Pattern erfüllt ist, gibt es genau einen Strafpunkt.
      *
      * @return Strafpunkte
      */
