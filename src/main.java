@@ -8,7 +8,7 @@ import java.util.List;
 public class main {
     public static void main(String argv[]) throws Exception {
         //CSV-Erstellung
-        String csvFile = "./out/output_new2.csv";
+        String csvFile = "./out/output.csv";
         FileWriter writer = new FileWriter(csvFile);
         CSVUtils.writeLine(writer, Arrays.asList("Dateiname",
                 "StartTemperatur",
@@ -17,11 +17,11 @@ public class main {
                 "Score"));
 
         String fileName = "long01";
-        final int[] startTempConst = {/*10000, 5000, 1000, 500, 100,*/ 10};
-        double[] coolingRateConst = {/*10, 5,*/ 1, 0.5, 0.1};
+        final int[] startTempConst = {10000, 5000, 1000, 500, 100, 10};
+        double[] coolingRateConst = {10, 5, 1, 0.5, 0.1};
         final double iterations = 10;
-        double[] coolingRateFrequency = {/*1, 0.5,*/ 0.1, 0.05, 0.01};
-        double[] startTempFrequency = {/*1000, 500, 100, 50, 10,*/ 1};
+        double[] coolingRateFrequency = {1, 0.5, 0.1, 0.05, 0.01};
+        double[] startTempFrequency = {1000, 500, 100, 50, 10, 1};
         int[] startTemp = new int[startTempConst.length];
         double[] coolingRate = new double[coolingRateConst.length];
 
