@@ -74,7 +74,6 @@ public class Constraint {
             throw new Exception("Verstoß gegen harte Restriktion...");
         }
         punishmentPoints += checkNumbAssigment();
-
         punishmentPoints += checkMaxConsecutiveWorkingDays();
         punishmentPoints += checkMinConsecutiveWorkingDays();
         punishmentPoints += checkMaxConsecutiveFreeDays();
@@ -85,7 +84,6 @@ public class Constraint {
         punishmentPoints += checkNoNightShiftBeforeFreeWeekend();
         punishmentPoints += checkDayOffRequest();
         punishmentPoints += checkShiftOffRequest();
-
         punishmentPoints += checkUnwantedPattern();
 
         return punishmentPoints;

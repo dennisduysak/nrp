@@ -26,12 +26,15 @@ public class InitialSolution {
         int employeeSize = employeeList.size();
         int employeeCount = 0;
 
+        //für jeden Tag
         for (int i = 0; i < helper.getDaysInPeriod(); i++) {
             List<RequirementsForDay> requirementsForDay = helper.getRequirementsForDay(i);
             int shiftTypeSize = requirementsForDay.size();
             int[][] day = new int[shiftTypeSize][employeeSize];
 
+            //für jede Schicht
             for (int j = 0; j < shiftTypeSize; j++) {
+                //für jeden Mitarbeiter
                 for (int k = employeeCount; k < employeeSize; k++) {
                     Employee employee = employeeList.get(k);
                     //wenn es eine DH Schicht ist prüfe ob der aktuelle Employee auch HeadNurse ist

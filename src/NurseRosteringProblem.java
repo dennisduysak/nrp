@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class RosteringNurseProblem {
+public class NurseRosteringProblem {
     public static void main(String argv[]) throws Exception {
         //CSV-Erstellung
         FileWriter writer = getFileWriter();
 
         //Testwerte erstellen
-        int[] startTempConst = {/*10000, 5000, 1000,*/ 500, 100, 10};
-        int[] startTempFrequency = {/*1000, 500, 100,*/ 50, 10, 1};
+        int[] startTempConst = {10000, 5000, 1000, 500, 100, 10};
+        int[] startTempFrequency = {1000, 500, 100, 50, 10, 1};
         double[] coolingRateConst = {10, 5, 1, 0.5, 0.1};
         double[] coolingRateFrequency = {1, 0.5, 0.1, 0.05, 0.01};
         double iterations = 10;
@@ -25,7 +25,9 @@ public class RosteringNurseProblem {
         XMLParser xmlParser = new XMLParser(fileName);
         SchedulingPeriod schedulingPeriod = xmlParser.parseXML();
 
+        //für jede startTemoeratur
         for (int i = 0; i < startTempConst.length; i++) {
+            //für jede coolingRate
             for (int j = 0; j < coolingRateConst.length; j++) {
                 System.arraycopy(coolingRateConst, 0, coolingRate, 0, coolingRateConst.length);
                 System.arraycopy(startTempConst, 0, startTemp, 0, startTempConst.length);
@@ -36,6 +38,7 @@ public class RosteringNurseProblem {
                     int numberOfIterations = (int) (startTemp[i] / coolingRate[j]);
                     double averageScore = getAverageScore(schedulingPeriod, startTemp[i], coolingRate[j]);
 
+                    // Schreibt den aktuellen Durchlauf in die CSV
                     CSVUtils.writeLine(writer, Arrays.asList(fileName,
                             String.valueOf(startTemp[i]),
                             String.valueOf(coolingRate[j]),
@@ -52,6 +55,7 @@ public class RosteringNurseProblem {
                     int numberOfIterations = (int) (startTemp[i] / coolingRate[j]);
                     double averageScore = getAverageScore(schedulingPeriod, startTemp[i], coolingRate[j]);
 
+                    // Schreibt den aktuellen Durchlauf in die CSV
                     CSVUtils.writeLine(writer, Arrays.asList(fileName,
                             String.valueOf(startTemp[i]),
                             String.valueOf(coolingRate[j]),
@@ -67,6 +71,12 @@ public class RosteringNurseProblem {
         writer.close();
     }
 
+    /**
+     * Erstellt dei CSV Datei mit dem Header
+     *
+     * @return
+     * @throws IOException
+     */
     private static FileWriter getFileWriter() throws IOException {
         String csvFile = "./out/output.csv";
         FileWriter writer = new FileWriter(csvFile);
@@ -88,6 +98,16 @@ public class RosteringNurseProblem {
         return new Solution(initialRoster, constraint.calcRosterScore());
     }
 
+    /**
+     * Simulated Annealing wird 5x auf die Initiallösung eingesetzt. Nach jedem Durchlauf wird der score gemerkt und
+     * ein durchschnittswert ermittelt.
+     *
+     * @param schedulingPeriod
+     * @param startingTemperature
+     * @param coolingRate
+     * @return Durchschnittlicher score
+     * @throws Exception
+     */
     private static double getAverageScore(SchedulingPeriod schedulingPeriod, double startingTemperature,
                                           double coolingRate) throws Exception {
         int repeat = 5;
